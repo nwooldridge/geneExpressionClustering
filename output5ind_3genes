@@ -1,0 +1,29 @@
+Timer started.
+
+Command line arguments: 
+	./readExpr goodTest.gex 5 3 
+
+
+***Important: Assumed columns represent individuals and rows represent genes/proteins in input file.***
+
+5 individuals and 3 genes.
+Assumed 1 header column(s) and 1 header row(s) in 'goodTest.gex'.
+**Missing values must be indicated by NN or NA.**
+
+
+Expression values range from 0.0045 to 0.7563.
+0 missing values in input file.
+
+Input Data:
+0.7563 0.1504 0.0125 0.0047 0.6598 
+0.0045 0.0546 0.2112 0.0454 0.5043 
+0.0232 0.5431 0.0045 0.4003 0.0091 
+
+Normalized values:
+1 -0.611865 -0.978718 -0.999468 0.743283 
+-1 -0.86672 -0.45012 -0.891194 0.329609 
+-0.950253 0.432828 -1 0.0529397 -0.987763 
+
+Timer stopped.
+0.00 seconds.
+
