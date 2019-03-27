@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <vector>
 #include <fstream>
+#include "../bitmap/bitmap_image.hpp"
 
 #include "data.h"
 
@@ -55,25 +56,69 @@ static double findSimilarityMeasure(data * d, double * individual, double * cent
 
 }
 
-static void generateCSV(data * d, string filename) {
+static void generateBMP(data * d, string filename, double minExpression, double maxExpression) {
 	
-	ofstream f;
-	f.open(filename.c_str(), fstream::out);
+	bitmap_image image(d->numIndividuals, d->numGenes);
+	for (int i = 0; i < d->numIndividuals; i++) {
+	
+		for (int j = 0; j < d->numGenes; j++) {
+		
+			
 
-	for (int i = 0; i < d->numGenes; i++) {
-                for (int j = 0; j < d->numIndividuals; j++) {
-                        f << d->values[j][i] << ",";
-                }
-                f << "\n";
-        }
-	f.close();	
+		}
+	}
+}
 
+static double * findQ1AndQ3(data * d) {
+
+	long i, j;
+
+	double * returnResult = new double[2];
+
+	double values[(d->numIndividuals * d->numGenes)];
+
+	long count = 0;
+	for (i = 0; i < d->numIndividuals; i++) {
+
+		for (j = 0; j < d->numGenes; j++) {
+
+			values[count] = d->values[i][j];
+			cout << values[count] << "\n";
+			count++;		
+		}
+	}
+
+	//bubblesort for simplicity
+	bool swap = true;
+	while (swap) {
+
+		swap = false;
+		
+		for (i = 0; i < (d->numIndividuals * d->numGenes); i++) {
+
+			if (i == (d->numIndividuals * d->numGenes - 1))
+				continue;
+			if (values[i] > values[i+1]) {
+
+				double temp = values[i];
+				values[i] = values[i+1];
+				values[i+1] = temp;
+				swap=true;
+			}
+		}
+	}
+	returnResult[0] = values[()];
+	returnResult[1] = values[()];
+	return returnResult;		
 }
 
 void clusterIndividuals(data * d, long k, long * centroids, double minSimilarityMeasure) {
 
 	long i;
-	generateCSV(d, "preAlgorithm.csv");
+
+	//generateBMP(d, "preAlgorithm.csv");
+	
+	double * v = findQ1AndQ3(d);
 	
 	for (i = 0; i < d->numIndividuals; i++) {
 
@@ -104,10 +149,10 @@ void clusterIndividuals(data * d, long k, long * centroids, double minSimilarity
 		//if less than, the individual will be moved to that centroid
 		if (mostRelatedSimilarityMeasure <= minSimilarityMeasure) {
 	
-			cout << "Individual " << i << " being moved to centroid " << mostRelatedCentroid << endl;	
+			//cout << "Individual " << i << " being moved to centroid " << mostRelatedCentroid << endl;	
 			moveIndividualToCentroid(d, i, mostRelatedCentroid);
 		}
 	}
-	generateCSV(d, "postAlgorithm.csv");
+	//generateBMP(d, "postAlgorithm.csv");
 }
 
