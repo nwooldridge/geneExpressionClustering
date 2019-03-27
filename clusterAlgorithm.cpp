@@ -1,6 +1,8 @@
 #include <cmath>
 #include <iostream>
 #include <cstdlib>
+#include <vector>
+#include <fstream>
 
 #include "data.h"
 
@@ -8,44 +10,35 @@ using namespace std;
 
 static void moveIndividualToCentroid(data * d, long individualIndex, long centroidIndividualIndex) {
 	
-	for (int i = 0; i < d->numIndividuals; i++) {
+	long i, j;
+	
+	vector<double *> beforeArr;
+	vector<double *> afterArr;
 
-		for (int j = 0; j < d->numGenes; j++)
-			cout << d->values[i][j] << " ";
-		cout << endl;
+	if (individualIndex > centroidIndividualIndex)
+		afterArr.push_back(d->values[individualIndex]);
 
+	for (i = 0; i < centroidIndividualIndex; i++) 
+		if (i != individualIndex) 
+			beforeArr.push_back(d->values[i]);
+	
+	for (i = centroidIndividualIndex + 1; i < d->numIndividuals; i++)
+		if (i != individualIndex)
+			afterArr.push_back(d->values[i]);
+
+	if (individualIndex < centroidIndividualIndex)
+		beforeArr.push_back(d->values[individualIndex]);		
+	
+	long count = 0;
+	for (i = 0; i < beforeArr.size(); i++) {
+		d->values[count] = beforeArr[i];
+		count++;
 	}
-
-	double * individual = d->values[individualIndex];
-	double * tempIndividual;
-
-	if (centroidIndividualIndex == (d->numIndividuals - 1)) {
-
-		cout << "centroid at last element" << endl;
-
+	count++;
+	for (i = 0; i < afterArr.size(); i++) {
+		d->values[count] = afterArr[i];
+		count++;
 	}
-	//moves individual with individualIndex 1 to the right of given centroidIndividualIndex
-	else {
-		tempIndividual = d->values[centroidIndividualIndex + 1];
-		d->values[centroidIndividualIndex + 1] = individual;
-		for (int i = centroidIndividualIndex + 2; i < d->numIndividuals; i++) {
-		
-			double * ind1 = d->values[i];
-			d->values[i] = tempIndividual;
-			tempIndividual = ind1;
-
-		}
-	}
-	cout << endl << endl << endl;
-
-	for (int i = 0; i < d->numIndividuals; i++) {
-
-                for (int j = 0; j < d->numGenes; j++)
-                        cout << d->values[i][j] << " ";
-                cout << endl;
-
-        }
- 
 }
 
 static double findSimilarityMeasure(data * d, double * individual, double * centroidIndividual) {
@@ -62,9 +55,26 @@ static double findSimilarityMeasure(data * d, double * individual, double * cent
 
 }
 
+static void generateCSV(data * d, string filename) {
+	
+	ofstream f;
+	f.open(filename.c_str(), fstream::out);
+
+	for (int i = 0; i < d->numGenes; i++) {
+                for (int j = 0; j < d->numIndividuals; j++) {
+                        f << d->values[j][i] << ",";
+                }
+                f << "\n";
+        }
+	f.close();	
+
+}
+
 void clusterIndividuals(data * d, long k, long * centroids, double minSimilarityMeasure) {
 
 	long i;
+	generateCSV(d, "preAlgorithm.csv");
+	
 	for (i = 0; i < d->numIndividuals; i++) {
 
 		//checks if individual is a centroid		
@@ -93,11 +103,11 @@ void clusterIndividuals(data * d, long k, long * centroids, double minSimilarity
 		//given minimumSimilarityMeasure
 		//if less than, the individual will be moved to that centroid
 		if (mostRelatedSimilarityMeasure <= minSimilarityMeasure) {
-			
+	
+			cout << "Individual " << i << " being moved to centroid " << mostRelatedCentroid << endl;	
 			moveIndividualToCentroid(d, i, mostRelatedCentroid);
-			cout << "Individual " << i << " being moved to centroid " << mostRelatedCentroid << endl;
-
 		}
 	}
+	generateCSV(d, "postAlgorithm.csv");
 }
 

@@ -24,7 +24,8 @@ int main(int argc, char ** argv) {
 	data d = parse(s, atoi(argv[2]), atoi(argv[3]));
 	d.numIndividuals = atoi(argv[2]);
 	d.numGenes = atoi(argv[3]);
-	cout << "numIndividuals: " << d.numIndividuals << " numGenes: " << d.numGenes << endl;
+
+	//cout << "numIndividuals: " << d.numIndividuals << " numGenes: " << d.numGenes << endl;
 
 	//Uncomment if you want to see all data outputted to console
 	/*	
@@ -45,7 +46,7 @@ int main(int argc, char ** argv) {
 		centroids[i] = rand() % d.numIndividuals;
 		
 
-	clusterIndividuals(&d, 13, centroids, 5);
+	clusterIndividuals(&d, 13, centroids, 10);
 	
 	for (int i = 0; i < d.numIndividuals; i++) {
 
