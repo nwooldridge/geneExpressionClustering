@@ -92,7 +92,5 @@ void clusterIndividuals(data * d, long k, long * centroids, double minSimilarity
 			moveIndividualToCentroid(d, i, mostRelatedCentroid);
 		}
 	}
-	//generateBMP(d, "postAlgorithm.csv");
-	
 }
 
