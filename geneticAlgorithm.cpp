@@ -139,11 +139,17 @@ static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populati
 		newPopulation[i] = reproduce(oldPopulation, populationSize, dataset);
 
 	delete[] oldPopulation;
-	return newPopulation;
-	
+	return newPopulation;	
 
 }
  
+static Iteration ** initializePopulation(data * dataSet, int populationSize) {
+
+	Iteration ** newPopulation = new Iteration*[populationSize];
+	return newPopulation;	
+
+}
+
 void geneticAlgorithm(long iterations, data * dataSet, int populationSize, int chanceOfMutation) {
 
 	srand(time(NULL));	
