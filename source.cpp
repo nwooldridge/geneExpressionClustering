@@ -8,6 +8,7 @@
 #include "parser.h"
 #include "clusterAlgorithm.h"
 #include "generateBMP.h"
+#include "geneticAlgorithm.h"
 
 using namespace std;
 
@@ -40,22 +41,12 @@ int main(int argc, char ** argv) {
 
 		cout << endl;
 	}
-	*/
-
-	long centroids[13];
-	for (int i = 0; i < 13; i++)
-		centroids[i] = rand() % d.numIndividuals;
-		
-	generateBMP(&d, "preAlgorithm.bmp");
-
-	clusterIndividuals(&d, 13, centroids, 10);
+	*/	
 	
-	generateBMP(&d, "postAlgorithm.bmp");
-	
+	geneticAlgorithm(5, &d, 10, 8);
+
 	for (int i = 0; i < d.numIndividuals; i++) {
-
 		delete[] d.values[i];
-
 	}
 	delete[] d.values;
 

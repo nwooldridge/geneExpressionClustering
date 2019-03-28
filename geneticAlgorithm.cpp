@@ -10,6 +10,8 @@ using namespace std;
 
 int mutationRate;
 
+
+//TO-DO: figure out how to find optimalSimilarityMeasures
 static double findOptimalIndividualSimilarityMeasure(data * d) {
 	double x;
 	return x;
@@ -18,6 +20,8 @@ static double findOptimalGeneSimilarityMeasure(data * d) {
 	double x;
 	return x;
 }
+	
+//copies data set and returns copy
 static data * copyData(data * d) {
 
 	long i,j;
@@ -52,8 +56,9 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	//The higher the fitness of the Iteration, the more copies of that iteration reference in naturalSelectionPool
 	long naturalSelectionPoolSize = 0;
 	for (i = 0; i < populationSize; i++) {
-		naturalSelectionPoolSize += fitnessSum / oldPopulation[i]->getFitness();
-		cout << (double) (fitnessSum / oldPopulation[i]->getFitness()) << endl;
+		naturalSelectionPoolSize += (fitnessSum / oldPopulation[i]->getFitness());
+		//cout << (double) (fitnessSum / oldPopulation[i]->getFitness()) << endl;
+		cout << oldPopulation[i]->getFitness() << " ";
 	}
 	Iteration * naturalSelectionPool[naturalSelectionPoolSize];
 
@@ -126,33 +131,86 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	offspring->setIndividualSimilarityMeasure(findOptimalIndividualSimilarityMeasure(dataset));
 	offspring->setGeneSimilarityMeasure(findOptimalGeneSimilarityMeasure(dataset));
 
+	clusterIndividuals(dataset, offspring->getK(), offspring->getCentroids(), offspring->getIndividualSimilarityMeasure());
+
 	offspring->setFitness(rand() % 100);	
 
 	return offspring;
 
 }
 
+//create new population of given amount of iterations
 static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populationSize, data * dataset) {
 
 	Iteration ** newPopulation = new Iteration*[populationSize];
 	for (int i = 0; i < populationSize; i++)
 		newPopulation[i] = reproduce(oldPopulation, populationSize, dataset);
-
+	/*
+	for (int i = 0; i < populationSize; i++)
+		delete oldPopulation[i];
+	*/
 	delete[] oldPopulation;
+
 	return newPopulation;	
 
 }
- 
+
+//create initial population of iterations 
 static Iteration ** initializePopulation(data * dataSet, int populationSize) {
-
+	
 	Iteration ** newPopulation = new Iteration*[populationSize];
+
+	for (int i = 0; i < populationSize; i++) {
+		newPopulation[i] = new Iteration(dataSet);
+		newPopulation[i]->setK(rand() % (dataSet->numIndividuals *(1/4) + 1) + 1);
+		newPopulation[i]->setCentroids(new long[newPopulation[i]->getK()]);
+		
+		//set centroids to random individuals
+		for (int j = 0; j < newPopulation[i]->getK(); j++) {
+			long centroid = rand() % dataSet->numIndividuals;
+			bool isExistingCentroid = false;
+			for (int k = 0; k < j; k++) {
+				if (centroid == newPopulation[i]->getCentroids()[k]) {
+					isExistingCentroid = true;
+					i--;
+					j--;
+					break;
+				}
+			}
+			if (!isExistingCentroid)
+				newPopulation[i]->getCentroids()[j] = centroid;
+		}
+		
+		newPopulation[i]->setFitness(rand() % 100);
+
+	}
 	return newPopulation;	
 
 }
 
+//entry point of this file
 void geneticAlgorithm(long iterations, data * dataSet, int populationSize, int chanceOfMutation) {
-
+	
 	srand(time(NULL));	
+	
 	mutationRate = chanceOfMutation;
 
+	Iteration ** population = initializePopulation(dataSet, populationSize);
+	
+	population = createNewPopulation(population, populationSize, dataSet);
+	
+	/*	
+	for (long i = 0; i < iterations; i++) {
+		
+		population = createNewPopulation(population, populationSize, dataSet);
+
+	}
+	*/
+
+	/*	
+	for (int i = 0; i < populationSize; i++)
+		delete population[i];	
+	*/
+	delete[] population;
+	
 }
