@@ -7,6 +7,7 @@
 #include "data.h"
 #include "parser.h"
 #include "clusterAlgorithm.h"
+#include "generateBMP.h"
 
 using namespace std;
 
@@ -45,8 +46,11 @@ int main(int argc, char ** argv) {
 	for (int i = 0; i < 13; i++)
 		centroids[i] = rand() % d.numIndividuals;
 		
+	generateBMP(&d, "preAlgorithm.bmp");
 
 	clusterIndividuals(&d, 13, centroids, 10);
+	
+	generateBMP(&d, "postAlgorithm.bmp");
 	
 	for (int i = 0; i < d.numIndividuals; i++) {
 
