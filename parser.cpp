@@ -46,7 +46,7 @@ data parse(string input, long numIndividuals, long numGenes) {
 	//Initialize data 
 	data d;
 	d.values = new double*[numIndividuals];
-	for (int i = 0; i < numIndividuals; i++)
+	for (long i = 0; i < numIndividuals; i++)
 		d.values[i] = new double[numGenes];
 
 

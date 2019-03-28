@@ -10,15 +10,25 @@ class Iteration {
 		int k;
 		long * centroids;
 		double individualSimilarityMeasure;
-		double geneSimilarityMeasure; 
+		double geneSimilarityMeasure;
+		double fitness; 
 
 	public:
-		Iteration(data *, long, long *);
+		Iteration(data *);
+		//Iteration(data *, int, long *, double, double);
+		~Iteration();
 		data * getData();
-		long getK();
+		void setData(data *);
+		int getK();
+		void setK(int);
 		long * getCentroids();
+		void setCentroids(long *);
 		double getIndividualSimilarityMeasure();
+		void setIndividualSimilarityMeasure(double);
 		double getGeneSimilarityMeasure();
+		void setGeneSimilarityMeasure(double);
+		double getFitness();
+		void setFitness(double);
 };
 
 #endif

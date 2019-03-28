@@ -41,7 +41,7 @@ static void moveIndividualToCentroid(data * d, long individualIndex, long centro
 	}
 }
 
-static double findSimilarityMeasure(data * d, double * individual, double * centroidIndividual) {
+double findSimilarityMeasure(data * d, double * individual, double * centroidIndividual) {
 	
 	double similarityMeasure = 0;
 	

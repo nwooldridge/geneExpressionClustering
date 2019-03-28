@@ -4,5 +4,5 @@
 
 #include "data.h"
 static void moveIndividualToCentroid(data *, long, long);
-static double findSimilarityMeasure(data *, double *, double *);
+double findSimilarityMeasure(data *, double *, double *);
 void clusterIndividuals(data *, long, long *, double);
