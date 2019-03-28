@@ -1,5 +1,8 @@
 #ifndef GENETICALGORITHM_H
 #define GENETICALGORITHM_H
+
+static int mutationRate;
+
 #endif
 
 #include "data.h"

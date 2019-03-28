@@ -3,8 +3,8 @@
 
 struct data {
 
-	int numIndividuals;
-	int numGenes;
+	long numIndividuals;
+	long numGenes;
 	double ** values;
 
 };

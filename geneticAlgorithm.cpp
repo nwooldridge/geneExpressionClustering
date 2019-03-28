@@ -8,6 +8,8 @@
 
 using namespace std;
 
+int mutationRate;
+
 static double findOptimalIndividualSimilarityMeasure(data * d) {
 	double x;
 	return x;
@@ -73,47 +75,53 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	
 	//set child's K value from parent's values
 	Iteration * offspring = new Iteration(copyData(dataset));
-	if ((rand() % 2) == 0)
-		offspring->setK(naturalSelectionPool[parents[0]]->getK());
-	else
-		offspring->setK(naturalSelectionPool[parents[1]]->getK());
-		
 	
+	//generate amount of clusters
+	//if mutation, generate value corresponding to amount of clusters bounded between 1 and 1/4th of number of individuals 
+	if ((rand() % mutationRate) == 0)
+		offspring->setK(rand() % (dataset->numIndividuals * (1/4) + 1));	
+	
+	else {
+		if ((rand() % 2) == 0)
+			offspring->setK(naturalSelectionPool[parents[0]]->getK());
+		else
+			offspring->setK(naturalSelectionPool[parents[1]]->getK());
+	}	
+	
+	//create centroids array based on K value
 	offspring->setCentroids(new long[offspring->getK()]);
 
-	//get centroids 
+	//set centroids for offspring
 	for (i = 0; i < offspring->getK(); i++) {
+
+		long centroid;
+
+		//generate mutated centroid
+		if ((rand() % mutationRate) == 0) {
+			centroid = rand() % dataset->numIndividuals;
+		}
 		
-		//50% chance of receiving centroid from 1 parent		
-		if ((rand() % 2) == 0) {
-			int randInt = rand() % naturalSelectionPool[parents[0]]->getK();
-			for (j = 0; j < i; j++) {
-				if ((offspring->getCentroids())[j] == randInt) {
-					i--;
-					break;
-				} 	
-				else {
-					(offspring->getCentroids())[i] = randInt;
-				}	
-			}
-		}	
-	 	
-		//50% chance of receiving centroid from other parent
+		//else get centroid from parent
 		else {
-			
-			int randInt = rand() % naturalSelectionPool[parents[1]]->getK();
-			for (j = 0; j < i; j++) {
-				 if ((offspring->getCentroids())[j] == randInt) {
-                                        i--;
-                                        break;
-                                }
-                                else {
-                                        (offspring->getCentroids())[i] = randInt;
-                                }
+			int parent = rand() % 2;
+	                int randInt = rand() % (naturalSelectionPool[parents[parent]]->getK());
+			centroid = naturalSelectionPool[parents[parent]]->getCentroids()[randInt];
+		
+		}
+
+		bool isExistantCentroid = false;
+		for (j = 0; j < i; j++) {
+			if ((offspring->getCentroids())[j] == centroid) {
+				i--;
+				isExistantCentroid = true;
+				break;
 			}
+		} 
+		
+		if (!isExistantCentroid) {
+			offspring->getCentroids()[i] = centroid;
 		}
 	}
-
 	return offspring;
 
 }
@@ -129,5 +137,6 @@ static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populati
 void geneticAlgorithm(long iterations, data * dataSet, int populationSize, int chanceOfMutation) {
 
 	srand(time(NULL));	
+	mutationRate = chanceOfMutation;
 
 }
