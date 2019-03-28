@@ -14,4 +14,3 @@ static data * copyData(data *);
 static Iteration * reproduce(Iteration **, int, data *);
 static Iteration ** createNewPopulation(Iteration **, int, data *);
 void geneticAlgorithm(long, data *, int, int);
-

@@ -41,4 +41,9 @@ void Iteration::setIndividualSimilarityMeasure(double x) {	this->individualSimil
 double Iteration::getGeneSimilarityMeasure() {			return this->geneSimilarityMeasure;}
 void Iteration::setGeneSimilarityMeasure(double x) {		this->geneSimilarityMeasure = x;}
 double Iteration::getFitness() {				return this->fitness;}
-void Iteration::setFitness(double x){				this->fitness = x;}
+
+void Iteration::setFitness(double x){
+	
+	this->fitness = x;
+
+}

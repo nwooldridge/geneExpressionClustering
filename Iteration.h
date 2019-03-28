@@ -29,6 +29,6 @@ class Iteration {
 		void setGeneSimilarityMeasure(double);
 		double getFitness();
 		void setFitness(double);
+		
 };
-
 #endif

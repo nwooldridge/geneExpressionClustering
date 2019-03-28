@@ -79,7 +79,7 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	//generate amount of clusters
 	//if mutation, generate value corresponding to amount of clusters bounded between 1 and 1/4th of number of individuals 
 	if ((rand() % mutationRate) == 0)
-		offspring->setK(rand() % (dataset->numIndividuals * (1/4) + 1));	
+		offspring->setK(rand() % (dataset->numIndividuals * (1/4) + 1) + 1);	
 	
 	else {
 		if ((rand() % 2) == 0)
@@ -122,18 +122,28 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 			offspring->getCentroids()[i] = centroid;
 		}
 	}
+
+	offspring->setIndividualSimilarityMeasure(findOptimalIndividualSimilarityMeasure(dataset));
+	offspring->setGeneSimilarityMeasure(findOptimalGeneSimilarityMeasure(dataset));
+
+	offspring->setFitness(rand() % 100);	
+
 	return offspring;
 
 }
 
-static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populationSize, data * dataSet) {
+static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populationSize, data * dataset) {
 
 	Iteration ** newPopulation = new Iteration*[populationSize];
+	for (int i = 0; i < populationSize; i++)
+		newPopulation[i] = reproduce(oldPopulation, populationSize, dataset);
+
 	delete[] oldPopulation;
 	return newPopulation;
 	
 
-} 
+}
+ 
 void geneticAlgorithm(long iterations, data * dataSet, int populationSize, int chanceOfMutation) {
 
 	srand(time(NULL));	
