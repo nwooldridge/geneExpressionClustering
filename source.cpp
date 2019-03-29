@@ -42,12 +42,13 @@ int main(int argc, char ** argv) {
 		cout << endl;
 	}
 	*/	
-	
-	geneticAlgorithm(5, &d, 10, 8);
+
+	geneticAlgorithm(5, &d, 50, 8);
 
 	for (int i = 0; i < d.numIndividuals; i++) {
 		delete[] d.values[i];
 	}
+
 	delete[] d.values;
 
 	return 0;

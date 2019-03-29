@@ -49,7 +49,6 @@ data parse(string input, long numIndividuals, long numGenes) {
 	for (long i = 0; i < numIndividuals; i++)
 		d.values[i] = new double[numGenes];
 
-
 	//set values
 	int columnIndex = 0;
 	for (int i = 0; i < lineArray.size(); i++) {

@@ -1,3 +1,4 @@
+#include <iostream>
 #include "data.h"
 #include "clusterAlgorithm.h"
 #include "Iteration.h"
@@ -40,10 +41,26 @@ double Iteration::getIndividualSimilarityMeasure() {		return this->individualSim
 void Iteration::setIndividualSimilarityMeasure(double x) {	this->individualSimilarityMeasure = x;}
 double Iteration::getGeneSimilarityMeasure() {			return this->geneSimilarityMeasure;}
 void Iteration::setGeneSimilarityMeasure(double x) {		this->geneSimilarityMeasure = x;}
-double Iteration::getFitness() {				return this->fitness;}
+int Iteration::getFitness() {					return this->fitness;}
+void Iteration::setFitness(int x){				this->fitness = x;}
+void Iteration::print() {
 
-void Iteration::setFitness(double x){
 	
-	this->fitness = x;
+	cout << "Iteration Information:" << endl << "Dataset address:( " << this->d << ") Dataset values(" << this->d->values << "):" << endl;
+	/*
+	for (long i = 0; i < this->d->numIndividuals; i++)
+		for (long j = 0; j < this->d->numGenes; j++)
+			cout << this->d->values[i][j] << " ";
+		cout << endl;
+	*/
+	cout << "K: " << this->k << endl;
+	cout << "Centroids: (" << this->centroids << "):" << endl;
+	for (int i = 0; i < this->k; i++)
+		cout << this->centroids[i] << "";
+	cout << endl;
+	cout << "IndividualSimilarityMeasure: " << this->individualSimilarityMeasure << endl;
+	cout << "GeneSimilarityMeasure: " << this->geneSimilarityMeasure << endl;
+	cout << "Fitness: " << this->fitness << endl << endl;
 
 }
+

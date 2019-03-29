@@ -13,11 +13,11 @@ int mutationRate;
 
 //TO-DO: figure out how to find optimalSimilarityMeasures
 static double findOptimalIndividualSimilarityMeasure(data * d) {
-	double x;
+	double x = 5;
 	return x;
 }
 static double findOptimalGeneSimilarityMeasure(data * d) {
-	double x;
+	double x = 5;
 	return x;
 }
 	
@@ -46,96 +46,86 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	
 	int i,j;
 	
-	//find sum of fitness of each member in population
-	double fitnessSum = 0;
-	for (i = 0; i < populationSize; i++)
-		fitnessSum += oldPopulation[i]->getFitness();
+	//TODO//
+	/*
+ *	
+ *	Need to find better way to emulate natural selection
+ *	
+ *	find way to pick parents from population based on fitness
+ *	higher fitness -> higher likelihood of being parent
+ *
+ * 	*/	
 	
-	//create naturalSelectionPool which holds pointers to iterations. 
-	//Used to choose parents for reproduction process
-	//The higher the fitness of the Iteration, the more copies of that iteration reference in naturalSelectionPool
-	long naturalSelectionPoolSize = 0;
-	for (i = 0; i < populationSize; i++) {
-		naturalSelectionPoolSize += (fitnessSum / oldPopulation[i]->getFitness());
-		//cout << (double) (fitnessSum / oldPopulation[i]->getFitness()) << endl;
-		cout << oldPopulation[i]->getFitness() << " ";
-	}
-	Iteration * naturalSelectionPool[naturalSelectionPoolSize];
+	long totalFitness = 0;
+	
+	for (i = 0; i < populationSize; i++) 
+		totalFitness += oldPopulation[i]->getFitness();
+	
+	if (totalFitness > (100*populationSize)) {//fitness should never be above 100
+		cout << "Fitness values above 100\n";
 
-	int count = 0;
+	}
+
+	//holds copies of iteration pointers for picking parents
+	//each iteration will have multiple copies in the pool,
+	//the higher the fitness, the more copies
+	//parents are chosen by picking random indices
+	Iteration * naturalSelectionPool[totalFitness];
+		
+	long count = 0;
 	for (i = 0; i < populationSize; i++) {
-		for (j = 0; j < oldPopulation[i]->getFitness(); j++) {
+
+		if (count >= totalFitness) {
+			cout << "Error generating natural selection pool.\n";
+			break;
+		}
+		for (j = 0; j < (oldPopulation[i]->getFitness()); j++) {
 			naturalSelectionPool[count] = oldPopulation[i];
 			count++;
 		}
 	}
-	
-	//get parents of child
-	long parents[2];
-	parents[0] = rand() % naturalSelectionPoolSize;
-	parents[1] = rand() % naturalSelectionPoolSize;
-	while (naturalSelectionPool[parents[0]] == naturalSelectionPool[parents[1]])
-		parents[1] = rand() % naturalSelectionPoolSize;
-	
-	
-	//set child's K value from parent's values
-	Iteration * offspring = new Iteration(copyData(dataset));
-	
-	//generate amount of clusters
-	//if mutation, generate value corresponding to amount of clusters bounded between 1 and 1/4th of number of individuals 
-	if ((rand() % mutationRate) == 0)
-		offspring->setK(rand() % (dataset->numIndividuals * (1/4) + 1) + 1);	
-	
-	else {
-		if ((rand() % 2) == 0)
-			offspring->setK(naturalSelectionPool[parents[0]]->getK());
-		else
-			offspring->setK(naturalSelectionPool[parents[1]]->getK());
-	}	
-	
-	//create centroids array based on K value
-	offspring->setCentroids(new long[offspring->getK()]);
-
-	//set centroids for offspring
-	for (i = 0; i < offspring->getK(); i++) {
-
-		long centroid;
-
-		//generate mutated centroid
-		if ((rand() % mutationRate) == 0) {
-			centroid = rand() % dataset->numIndividuals;
-		}
 		
-		//else get centroid from parent
-		else {
-			int parent = rand() % 2;
-	                int randInt = rand() % (naturalSelectionPool[parents[parent]]->getK());
-			centroid = naturalSelectionPool[parents[parent]]->getCentroids()[randInt];
-		
-		}
+	int parentCount = 2;
 
-		bool isExistantCentroid = false;
-		for (j = 0; j < i; j++) {
-			if ((offspring->getCentroids())[j] == centroid) {
-				i--;
-				isExistantCentroid = true;
-				break;
-			}
-		} 
-		
-		if (!isExistantCentroid) {
-			offspring->getCentroids()[i] = centroid;
-		}
+	//get parents from emulated natural selection
+	Iteration * parents[parentCount];
+
+	for (i = 0; i < parentCount; i++)
+		parents[i] = naturalSelectionPool[rand() % totalFitness];
+	
+	//create new Iteration object
+	Iteration * offSpring = new Iteration(copyData(dataset));	
+	
+	//
+	//set amount of clusters for new offspring
+	//
+	//
+
+	if ((rand() % mutationRate) == 0) { //chance of mutation
+		offSpring->setK(rand() % (dataset->numIndividuals * 1/4 + 1) + 1);
 	}
+	else {//otherwise inherits from parents
+		//50% chance of getting k from 1 parent or the other
+		int parent = rand() % parentCount;
+			offSpring->setK(parents[parent]->getK());
+	}
+	
+	//cout << offSpring->getK() << endl;
 
-	offspring->setIndividualSimilarityMeasure(findOptimalIndividualSimilarityMeasure(dataset));
-	offspring->setGeneSimilarityMeasure(findOptimalGeneSimilarityMeasure(dataset));
+	long * centroids = new long[offSpring->getK()];
 
-	clusterIndividuals(dataset, offspring->getK(), offspring->getCentroids(), offspring->getIndividualSimilarityMeasure());
+	//create centroids array based on K value
 
-	offspring->setFitness(rand() % 100);	
+	offSpring->setCentroids(centroids);
+	
+	offSpring->setIndividualSimilarityMeasure(findOptimalIndividualSimilarityMeasure(dataset));
+	offSpring->setGeneSimilarityMeasure(findOptimalGeneSimilarityMeasure(dataset));
 
-	return offspring;
+	clusterIndividuals(dataset, offSpring->getK(), offSpring->getCentroids(), offSpring->getIndividualSimilarityMeasure());
+
+	offSpring->setFitness(rand() % 100);	
+
+	return offSpring;
 
 }
 
@@ -149,6 +139,7 @@ static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populati
 	for (int i = 0; i < populationSize; i++)
 		delete oldPopulation[i];
 	*/
+	
 	delete[] oldPopulation;
 
 	return newPopulation;	
@@ -159,11 +150,14 @@ static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populati
 static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 	
 	Iteration ** newPopulation = new Iteration*[populationSize];
-
+	
 	for (int i = 0; i < populationSize; i++) {
-		newPopulation[i] = new Iteration(dataSet);
-		newPopulation[i]->setK(rand() % (dataSet->numIndividuals *(1/4) + 1) + 1);
+		newPopulation[i] = new Iteration(copyData(dataSet));
+		cout << rand() % (dataSet->numIndividuals *(1/4) + 1) + 1 << endl;
+		newPopulation[i]->setK(rand() % (dataSet->numIndividuals - 1) + 1);
 		newPopulation[i]->setCentroids(new long[newPopulation[i]->getK()]);
+		newPopulation[i]->setIndividualSimilarityMeasure(5);
+		newPopulation[i]->setGeneSimilarityMeasure(5);
 		
 		//set centroids to random individuals
 		for (int j = 0; j < newPopulation[i]->getK(); j++) {
@@ -182,6 +176,8 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 		}
 		
 		newPopulation[i]->setFitness(rand() % 100);
+
+		newPopulation[i]->print();
 
 	}
 	return newPopulation;	
