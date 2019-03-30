@@ -23,7 +23,7 @@ Iteration::Iteration(data * d, int k, long * centroids, double individualSimilar
 */
 Iteration::~Iteration() {
 	
-	long i;
+	int i;
 	for (i = 0; i < this->d->numIndividuals; i++)
 		delete[] this->d->values[i];
 	delete[] this->d->values;
@@ -35,8 +35,8 @@ data * Iteration::getData() {					return this->d;}
 void Iteration::setData(data * d) {				this->d = d;}
 int Iteration::getK() {						return this->k;}
 void Iteration::setK(int k) {					this->k = k;}
-long * Iteration::getCentroids() {				return this->centroids;}
-void Iteration::setCentroids(long * ptr) {			this->centroids = ptr;}
+int * Iteration::getCentroids() {				return this->centroids;}
+void Iteration::setCentroids(int * ptr) {			this->centroids = ptr;}
 double Iteration::getIndividualSimilarityMeasure() {		return this->individualSimilarityMeasure;}
 void Iteration::setIndividualSimilarityMeasure(double x) {	this->individualSimilarityMeasure = x;}
 double Iteration::getGeneSimilarityMeasure() {			return this->geneSimilarityMeasure;}
@@ -47,16 +47,10 @@ void Iteration::print() {
 
 	
 	cout << "Iteration Information:" << endl << "Dataset address:( " << this->d << ") Dataset values(" << this->d->values << "):" << endl;
-	/*
-	for (long i = 0; i < this->d->numIndividuals; i++)
-		for (long j = 0; j < this->d->numGenes; j++)
-			cout << this->d->values[i][j] << " ";
-		cout << endl;
-	*/
 	cout << "K: " << this->k << endl;
 	cout << "Centroids: (" << this->centroids << "):" << endl;
 	for (int i = 0; i < this->k; i++)
-		cout << this->centroids[i] << "";
+		cout << this->centroids[i] << " ";
 	cout << endl;
 	cout << "IndividualSimilarityMeasure: " << this->individualSimilarityMeasure << endl;
 	cout << "GeneSimilarityMeasure: " << this->geneSimilarityMeasure << endl;

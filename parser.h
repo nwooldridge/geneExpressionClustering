@@ -6,7 +6,7 @@
 #define PARSER_H
 #endif
 
-data parse(std::string, const long, const long);
+data parse(std::string, const int, const int);
 
 
 

@@ -8,7 +8,7 @@ class Iteration {
 	private:
 		data * d;
 		int k;
-		long * centroids;
+		int * centroids;
 		double individualSimilarityMeasure;
 		double geneSimilarityMeasure;
 		int fitness; 
@@ -21,8 +21,8 @@ class Iteration {
 		void setData(data *);
 		int getK();
 		void setK(int);
-		long * getCentroids();
-		void setCentroids(long *);
+		int * getCentroids();
+		void setCentroids(int *);
 		double getIndividualSimilarityMeasure();
 		void setIndividualSimilarityMeasure(double);
 		double getGeneSimilarityMeasure();

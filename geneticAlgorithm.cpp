@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <vector>
 
 #include "data.h"
 #include "clusterAlgorithm.h"
@@ -24,7 +25,7 @@ static double findOptimalGeneSimilarityMeasure(data * d) {
 //copies data set and returns copy
 static data * copyData(data * d) {
 
-	long i,j;
+	int i,j;
 	data * newCopy = new data;
 
 	newCopy->numIndividuals = d->numIndividuals;
@@ -107,12 +108,12 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	else {//otherwise inherits from parents
 		//50% chance of getting k from 1 parent or the other
 		int parent = rand() % parentCount;
-			offSpring->setK(parents[parent]->getK());
+		offSpring->setK(parents[parent]->getK());
 	}
 	
 	//cout << offSpring->getK() << endl;
 
-	long * centroids = new long[offSpring->getK()];
+	int * centroids = new int[offSpring->getK()];
 
 	//create centroids array based on K value
 
@@ -152,28 +153,34 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 	Iteration ** newPopulation = new Iteration*[populationSize];
 	
 	for (int i = 0; i < populationSize; i++) {
+	
 		newPopulation[i] = new Iteration(copyData(dataSet));
-		cout << rand() % (dataSet->numIndividuals *(1/4) + 1) + 1 << endl;
-		newPopulation[i]->setK(rand() % (dataSet->numIndividuals - 1) + 1);
-		newPopulation[i]->setCentroids(new long[newPopulation[i]->getK()]);
+		//cout << rand() % (dataSet->numIndividuals *(1/4) + 1) + 1 << endl;
+		newPopulation[i]->setK(5);		//rand() % (dataSet->numIndividuals - (1/4*(dataSet->numIndividuals))) + 5);
+		newPopulation[i]->setCentroids(new int[newPopulation[i]->getK()]);
 		newPopulation[i]->setIndividualSimilarityMeasure(5);
 		newPopulation[i]->setGeneSimilarityMeasure(5);
 		
 		//set centroids to random individuals
-		for (int j = 0; j < newPopulation[i]->getK(); j++) {
-			long centroid = rand() % dataSet->numIndividuals;
-			bool isExistingCentroid = false;
-			for (int k = 0; k < j; k++) {
-				if (centroid == newPopulation[i]->getCentroids()[k]) {
-					isExistingCentroid = true;
-					i--;
-					j--;
+	
+		vector<int> usedNumbers;
+
+		for (int j = 0; j < (newPopulation[i]->getK()); j++) {
+			bool isDuplicate = false;
+			int centroid = rand() % dataSet->numIndividuals;
+			for (int k = 0; k < usedNumbers.size(); k++) 
+				if (centroid == usedNumbers[k]) {
+					isDuplicate = true;
 					break;
 				}
-			}
-			if (!isExistingCentroid)
+		
+			if (!isDuplicate) {
+				cout << "hello";
 				newPopulation[i]->getCentroids()[j] = centroid;
+				usedNumbers.push_back(centroid);	
+			}
 		}
+		
 		
 		newPopulation[i]->setFitness(rand() % 100);
 

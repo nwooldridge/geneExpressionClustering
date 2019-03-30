@@ -8,9 +8,9 @@
 
 using namespace std;
 
-static void moveIndividualToCentroid(data * d, long individualIndex, long centroidIndividualIndex) {
+static void moveIndividualToCentroid(data * d, int individualIndex, int centroidIndividualIndex) {
 	
-	long i, j;
+	int i, j;
 	
 	vector<double *> beforeArr;
 	vector<double *> afterArr;
@@ -55,9 +55,9 @@ double findSimilarityMeasure(data * d, double * individual, double * centroidInd
 
 }
 
-void clusterIndividuals(data * d, long k, long * centroids, double minSimilarityMeasure) {
+void clusterIndividuals(data * d, int k, int * centroids, double minSimilarityMeasure) {
 
-	long i;
+	int i;
 		
 	for (i = 0; i < d->numIndividuals; i++) {
 
@@ -72,8 +72,8 @@ void clusterIndividuals(data * d, long k, long * centroids, double minSimilarity
 		//compare individual to centroids
 		//if less than minSimilarityMeasure then individual is moved to centroid
 		double mostRelatedSimilarityMeasure = 10000000;
-		long mostRelatedCentroid;
-		for (long j = 0; j < k; j++) {
+		int mostRelatedCentroid;
+		for (int j = 0; j < k; j++) {
 			
 			//if lower similarityMeasure is found then keep track of that centroid	
 			if (findSimilarityMeasure(d, d->values[i], d->values[ centroids[j] ]) < mostRelatedSimilarityMeasure) {

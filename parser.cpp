@@ -8,7 +8,7 @@
 using namespace std;
 
 //Uses output of Dr. Climer's readExpression algorithm, and parses the data from the normalized values table
-data parse(string input, long numIndividuals, long numGenes) {
+data parse(string input, int numIndividuals, int numGenes) {
 	
 	fstream f;
 	
@@ -46,7 +46,7 @@ data parse(string input, long numIndividuals, long numGenes) {
 	//Initialize data 
 	data d;
 	d.values = new double*[numIndividuals];
-	for (long i = 0; i < numIndividuals; i++)
+	for (int i = 0; i < numIndividuals; i++)
 		d.values[i] = new double[numGenes];
 
 	//set values
