@@ -177,8 +177,10 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 			if (!isDuplicate) {
 				cout << "hello";
 				newPopulation[i]->getCentroids()[j] = centroid;
-				usedNumbers.push_back(centroid);	
+				usedNumbers.push_back(centroid);
 			}
+			else
+				j--;
 		}
 		
 		
