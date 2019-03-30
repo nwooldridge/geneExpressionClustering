@@ -22,31 +22,14 @@ int main(int argc, char ** argv) {
 		exit(-1);
 	}
 	
-	cout << "hi";
 	
 	s = argv[1];
 	data d = parse(s, atoi(argv[2]), atoi(argv[3]));
 	d.numIndividuals = atoi(argv[2]);
 	d.numGenes = atoi(argv[3]);
 
-	//cout << "numIndividuals: " << d.numIndividuals << " numGenes: " << d.numGenes << endl;
 
-	//Uncomment if you want to see all data outputted to console
-	/*	
-	for (int i = 0; i < d.numGenes; i++) {
-
-		for (int j = 0; j < d.numIndividuals; j++) {			
-
-			cout << d.values[j][i] << " ";
-
-		}
-
-		cout << endl;
-	}
-	*/	
-
-	cout << "hi";
-	geneticAlgorithm(15, &d, 50, 8);
+	geneticAlgorithm(100, &d, 50, 8);
 
 	for (int i = 0; i < d.numIndividuals; i++) {
 		delete[] d.values[i];

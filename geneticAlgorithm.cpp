@@ -5,14 +5,16 @@
 
 #include "data.h"
 #include "clusterAlgorithm.h"
+#include "generateBMP.h"
 #include "Iteration.h"
 
 using namespace std;
 
 int mutationRate;
+long iterations = 0;
 
 
-//TO-DO: figure out how to find optimalSimilarityMeasures
+//TODO: figure out how to find optimalSimilarityMeasures
 static double findOptimalIndividualSimilarityMeasure(data * d) {
 	double x = 5;
 	return x;
@@ -47,16 +49,6 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	
 	int i,j;
 	
-	//TODO//
-	/*
- *	
- *	Need to find better way to emulate natural selection
- *	
- *	find way to pick parents from population based on fitness
- *	higher fitness -> higher likelihood of being parent
- *
- * 	*/	
-	
 	long totalFitness = 0;
 	
 	for (i = 0; i < populationSize; i++) {
@@ -77,8 +69,8 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	long count = 0;
 	for (i = 0; i < populationSize; i++) {
 		if (count >= totalFitness) {
-			cout << "Error generating natural selection pool." << count << " : " << totalFitness << endl;
-			
+			//cout << "Error generating natural selection pool." << count << " : " << totalFitness << endl;	
+			break;
 		}
 		else
 			for (j = 0; j < (oldPopulation[i]->getFitness()); j++) {
@@ -88,6 +80,7 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	}
 	
 
+	//change this so offspring inherits "genes" from different amount of parents
 	int parentCount = 2;
 
 	//get parents from emulated natural selection
@@ -139,7 +132,7 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	offSpring->setGeneSimilarityMeasure(findOptimalGeneSimilarityMeasure(dataset));
 	offSpring->setFitness(rand() % 100);
 
-	clusterIndividuals(dataset, offSpring->getK(), offSpring->getCentroids(), offSpring->getIndividualSimilarityMeasure());
+	clusterIndividuals(offSpring);
 
 	//offSpring->print();
 
@@ -153,11 +146,18 @@ static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populati
 	Iteration ** newPopulation = new Iteration*[populationSize];
 	for (int i = 0; i < populationSize; i++)
 		newPopulation[i] = reproduce(oldPopulation, populationSize, dataset);
-	/*
-	for (int i = 0; i < populationSize; i++)
-		delete oldPopulation[i];
-	*/
 	
+	
+	for (int i = 0; i < populationSize; i++) {
+		if ((iterations % 10) == 0) {
+			string filename = "../results/";
+			filename += ("pop" + to_string(iterations) + "iteration" + to_string(i) + ".bmp");
+			generateBMP(newPopulation[i]->getData(), filename);
+		}
+		
+	}
+
+	iterations++;
 	cout << "New population generated\n";
 	
 	delete[] oldPopulation;
@@ -231,6 +231,7 @@ void geneticAlgorithm(long iterations, data * dataSet, int populationSize, int c
 	for (int i = 0; i < populationSize; i++)
 		delete population[i];	
 	*/
+
 	delete[] population;
 	
 }

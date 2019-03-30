@@ -2,7 +2,7 @@
 #define GENETICALGORITHM_H
 
 static int mutationRate;
-
+static long iterations;
 #endif
 
 #include "data.h"

@@ -5,6 +5,7 @@
 #include <fstream>
 
 #include "data.h"
+#include "Iteration.h"
 
 using namespace std;
 
@@ -55,9 +56,14 @@ double findSimilarityMeasure(data * d, double * individual, double * centroidInd
 
 }
 
-void clusterIndividuals(data * d, int k, int * centroids, double minSimilarityMeasure) {
+void clusterIndividuals(Iteration * iteration) {
 
 	int i;
+
+	data * d = iteration->getData();
+	int k = iteration->getK();
+	int * centroids = iteration->getCentroids();
+	double minSimilarityMeasure = iteration->getIndividualSimilarityMeasure();
 		
 	for (i = 0; i < d->numIndividuals; i++) {
 

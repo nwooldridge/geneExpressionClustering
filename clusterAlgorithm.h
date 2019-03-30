@@ -3,6 +3,8 @@
 #endif
 
 #include "data.h"
+#include "Iteration.h"
+
 static void moveIndividualToCentroid(data *, int, int);
 double findSimilarityMeasure(data *, double *, double *);
-void clusterIndividuals(data *, int, int *, double);
+void clusterIndividuals(Iteration *);
