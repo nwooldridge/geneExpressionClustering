@@ -43,6 +43,10 @@ double Iteration::getGeneSimilarityMeasure() {			return this->geneSimilarityMeas
 void Iteration::setGeneSimilarityMeasure(double x) {		this->geneSimilarityMeasure = x;}
 int Iteration::getFitness() {					return this->fitness;}
 void Iteration::setFitness(int x){				this->fitness = x;}
+int Iteration::getAmountOfIndividualsClustered() {		return this->amountOfIndividualsClustered;}
+void Iteration::setAmountOfIndividualsClustered(int x) {	this->amountOfIndividualsClustered = x;}
+int Iteration::getAmountOfGenesClustered() {			return this->amountOfGenesClustered;}
+void Iteration::setAmountOfGenesClustered(int x) {		this->amountOfGenesClustered = x;}
 void Iteration::print() {
 
 	

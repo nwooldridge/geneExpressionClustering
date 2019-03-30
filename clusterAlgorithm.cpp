@@ -42,7 +42,7 @@ static void moveIndividualToCentroid(data * d, int individualIndex, int centroid
 	}
 }
 
-double findSimilarityMeasure(data * d, double * individual, double * centroidIndividual) {
+double findIndividualSimilarityMeasure(data * d, double * individual, double * centroidIndividual) {
 	
 	double similarityMeasure = 0;
 	
@@ -53,6 +53,13 @@ double findSimilarityMeasure(data * d, double * individual, double * centroidInd
 	}
 	
 	return similarityMeasure;
+
+}
+
+double findGeneSimilarityMeasure(data * d, double * gene, double * centroidGene) {
+
+	
+	
 
 }
 
@@ -82,9 +89,9 @@ void clusterIndividuals(Iteration * iteration) {
 		for (int j = 0; j < k; j++) {
 			
 			//if lower similarityMeasure is found then keep track of that centroid	
-			if (findSimilarityMeasure(d, d->values[i], d->values[ centroids[j] ]) < mostRelatedSimilarityMeasure) {
+			if (findIndividualSimilarityMeasure(d, d->values[i], d->values[ centroids[j] ]) < mostRelatedSimilarityMeasure) {
 				
-				mostRelatedSimilarityMeasure = findSimilarityMeasure(d, d->values[i], d->values[ centroids[j] ]);
+				mostRelatedSimilarityMeasure = findIndividualSimilarityMeasure(d, d->values[i], d->values[ centroids[j] ]);
 				mostRelatedCentroid = centroids[j];					
 		
 			}
@@ -98,5 +105,16 @@ void clusterIndividuals(Iteration * iteration) {
 			moveIndividualToCentroid(d, i, mostRelatedCentroid);
 		}
 	}
+}
+
+void clusterGenes(Iteration * iteration) {
+
+	int i;
+
+	data * d = iteration->getData();
+	int k = iteration->getK();
+	int * centroids = iteration->getCentroids();
+	double minSimilarityMeasure = iteration->getGeneSimilarityMeasure();
+
 }
 

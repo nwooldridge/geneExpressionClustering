@@ -6,5 +6,7 @@
 #include "Iteration.h"
 
 static void moveIndividualToCentroid(data *, int, int);
-double findSimilarityMeasure(data *, double *, double *);
+double findIndividualSimilarityMeasure(data *, double *, double *);
+double findGeneSimilarityMeasure(data *, double *, double *);
 void clusterIndividuals(Iteration *);
+void clusterGenes(Iteration *);

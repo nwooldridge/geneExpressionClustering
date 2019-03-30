@@ -11,7 +11,9 @@ class Iteration {
 		int * centroids;
 		double individualSimilarityMeasure;
 		double geneSimilarityMeasure;
-		int fitness; 
+		int fitness;
+		int amountOfIndividualsClustered;
+		int amountOfGenesClustered;
 
 	public:
 		Iteration(data *);
@@ -29,6 +31,10 @@ class Iteration {
 		void setGeneSimilarityMeasure(double);
 		int getFitness();
 		void setFitness(int);
+		int getAmountOfIndividualsClustered();
+		void setAmountOfIndividualsClustered(int);
+		int getAmountOfGenesClustered();
+		void setAmountOfGenesClustered(int);
 		void print();
 		
 		
