@@ -59,13 +59,14 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	
 	long totalFitness = 0;
 	
-	for (i = 0; i < populationSize; i++) 
-		totalFitness += oldPopulation[i]->getFitness();
-	
-	if (totalFitness > (100*populationSize)) {//fitness should never be above 100
-		cout << "Fitness values above 100\n";
-
+	for (i = 0; i < populationSize; i++) {
+		if ((oldPopulation[i]->getFitness() < 100) && (oldPopulation[i]->getFitness() >= 0))
+			totalFitness += (oldPopulation[i]->getFitness());
+		else
+			cout << "Error, fitness is value not between 0-99\n";
 	}
+	
+	
 
 	//holds copies of iteration pointers for picking parents
 	//each iteration will have multiple copies in the pool,
@@ -75,17 +76,18 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 		
 	long count = 0;
 	for (i = 0; i < populationSize; i++) {
-
 		if (count >= totalFitness) {
-			cout << "Error generating natural selection pool.\n";
-			break;
+			cout << "Error generating natural selection pool." << count << " : " << totalFitness << endl;
+			
 		}
-		for (j = 0; j < (oldPopulation[i]->getFitness()); j++) {
-			naturalSelectionPool[count] = oldPopulation[i];
-			count++;
-		}
+		else
+			for (j = 0; j < (oldPopulation[i]->getFitness()); j++) {
+				naturalSelectionPool[count] = oldPopulation[i];
+				count++;
+			}
 	}
-		
+	
+
 	int parentCount = 2;
 
 	//get parents from emulated natural selection
@@ -98,6 +100,7 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	Iteration * offSpring = new Iteration(copyData(dataset));	
 	
 	//
+	//
 	//set amount of clusters for new offspring
 	//
 	//
@@ -106,25 +109,39 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 		offSpring->setK(rand() % (dataset->numIndividuals * 1/4 + 1) + 1);
 	}
 	else {//otherwise inherits from parents
-		//50% chance of getting k from 1 parent or the other
-		int parent = rand() % parentCount;
-		offSpring->setK(parents[parent]->getK());
+		//get k from random parent
+		offSpring->setK(parents[rand() % parentCount]->getK());
+	}
+
+
+	//
+	//
+	//getting centroids from parents
+	//
+	//
+
+ 	int * centroids = new int[offSpring->getK()];
+
+	
+	for (i = 0; i < offSpring->getK(); i++) {
+		if ((rand() % mutationRate) == 0) { //inherit mutated centroid (just random centroid)
+			centroids[i] = rand() % dataset->numIndividuals;
+		}
+		else { //inherit centroids from parents			
+			int parent = rand() % parentCount;
+			centroids[i] = parents[parent]->getCentroids()[rand() % (parents[parent]->getK())];
+		}
 	}
 	
-	//cout << offSpring->getK() << endl;
-
-	int * centroids = new int[offSpring->getK()];
-
-	//create centroids array based on K value
 
 	offSpring->setCentroids(centroids);
-	
 	offSpring->setIndividualSimilarityMeasure(findOptimalIndividualSimilarityMeasure(dataset));
 	offSpring->setGeneSimilarityMeasure(findOptimalGeneSimilarityMeasure(dataset));
+	offSpring->setFitness(rand() % 100);
 
 	clusterIndividuals(dataset, offSpring->getK(), offSpring->getCentroids(), offSpring->getIndividualSimilarityMeasure());
 
-	offSpring->setFitness(rand() % 100);	
+	//offSpring->print();
 
 	return offSpring;
 
@@ -141,6 +158,8 @@ static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populati
 		delete oldPopulation[i];
 	*/
 	
+	cout << "New population generated\n";
+	
 	delete[] oldPopulation;
 
 	return newPopulation;	
@@ -155,7 +174,6 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 	for (int i = 0; i < populationSize; i++) {
 	
 		newPopulation[i] = new Iteration(copyData(dataSet));
-		//cout << rand() % (dataSet->numIndividuals *(1/4) + 1) + 1 << endl;
 		newPopulation[i]->setK(5);		//rand() % (dataSet->numIndividuals - (1/4*(dataSet->numIndividuals))) + 5);
 		newPopulation[i]->setCentroids(new int[newPopulation[i]->getK()]);
 		newPopulation[i]->setIndividualSimilarityMeasure(5);
@@ -175,7 +193,6 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 				}
 		
 			if (!isDuplicate) {
-				cout << "hello";
 				newPopulation[i]->getCentroids()[j] = centroid;
 				usedNumbers.push_back(centroid);
 			}
@@ -183,10 +200,7 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 				j--;
 		}
 		
-		
 		newPopulation[i]->setFitness(rand() % 100);
-
-		newPopulation[i]->print();
 
 	}
 	return newPopulation;	
@@ -204,13 +218,14 @@ void geneticAlgorithm(long iterations, data * dataSet, int populationSize, int c
 	
 	population = createNewPopulation(population, populationSize, dataSet);
 	
-	/*	
+			
 	for (long i = 0; i < iterations; i++) {
 		
 		population = createNewPopulation(population, populationSize, dataSet);
 
 	}
-	*/
+	
+	
 
 	/*	
 	for (int i = 0; i < populationSize; i++)

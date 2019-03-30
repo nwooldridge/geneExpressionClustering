@@ -46,7 +46,7 @@ int main(int argc, char ** argv) {
 	*/	
 
 	cout << "hi";
-	geneticAlgorithm(5, &d, 50, 8);
+	geneticAlgorithm(15, &d, 50, 8);
 
 	for (int i = 0; i < d.numIndividuals; i++) {
 		delete[] d.values[i];
