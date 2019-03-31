@@ -74,6 +74,8 @@ static double findGeneSimilarityMeasure(data * d, int geneIndex, int centroidGen
 
 	for (int i = 0; i < (d->numIndividuals); i++) 
 		similarityMeasure += abs((d->values[i][geneIndex]) - (d->values[i][centroidGeneIndex]));
+	
+	
 		
 	return similarityMeasure;
 }
@@ -84,7 +86,7 @@ void clusterIndividuals(Iteration * iteration) {
 
 	data * d = iteration->getData();
 	int k = iteration->getK();
-	int * centroids = iteration->getCentroids();
+	int * centroids = iteration->getIndividualCentroids();
 	double minSimilarityMeasure = iteration->getIndividualSimilarityMeasure();
 		
 	for (i = 0; i < d->numIndividuals; i++) {
@@ -128,7 +130,7 @@ void clusterGenes(Iteration * iteration) {
 
 	data * d = iteration->getData();
 	int k = iteration->getK();
-	int * centroids = iteration->getCentroids();
+	int * centroids = iteration->getGeneCentroids();
 	double minSimilarityMeasure = iteration->getGeneSimilarityMeasure();
 
 	

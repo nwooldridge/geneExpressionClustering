@@ -8,19 +8,7 @@ using namespace std;
 Iteration::Iteration(data * d) {
 	this->d = d;
 }
-/*
-Iteration::Iteration(data * d, int k, long * centroids, double individualSimilarityMeasure, double geneSimilarityMeasure) {
 
-	this->d = d;
-	this->k = k;
-	this->centroids = centroids;
-	this->individualSimilarityMeasure = individualSimilarityMeasure;
-	this->geneSimilarityMeasure = geneSimilarityMeasure;
-
-	clusterIndividuals(d, k, centroids, individualSimilarityMeasure);
-
-}
-*/
 Iteration::~Iteration() {
 	
 	int i;
@@ -28,15 +16,20 @@ Iteration::~Iteration() {
 		delete[] this->d->values[i];
 	delete[] this->d->values;
 
-	delete[] this->centroids; 
+	delete[] this->individualCentroids; 
+	delete[] this->geneCentroids;
 	
 }
 data * Iteration::getData() {					return this->d;}
 void Iteration::setData(data * d) {				this->d = d;}
-int Iteration::getK() {						return this->k;}
-void Iteration::setK(int k) {					this->k = k;}
-int * Iteration::getCentroids() {				return this->centroids;}
-void Iteration::setCentroids(int * ptr) {			this->centroids = ptr;}
+int Iteration::getKForIndividuals() {				return this->KForIndividuals;}
+void Iteration::setKForIndividuals(int k) {			this->KForIndividuals = k;}
+int Iteration::getKForGenes() {					return this->KForGenes;}
+void Iteration::setKForGenes(int k) {				this->KForGenes = k;}
+int * Iteration::getIndividualCentroids() {			return this->individualCentroids;}
+void Iteration::setIndividualCentroids(int * ptr) {		this->individualCentroids = ptr;}
+int * Iteration::getGeneCentroids() {				return this->geneCentroids;}
+void Iteration::setGeneCentroids(int * ptr) {			this->geneCentroids = ptr;}
 double Iteration::getIndividualSimilarityMeasure() {		return this->individualSimilarityMeasure;}
 void Iteration::setIndividualSimilarityMeasure(double x) {	this->individualSimilarityMeasure = x;}
 double Iteration::getGeneSimilarityMeasure() {			return this->geneSimilarityMeasure;}
@@ -51,11 +44,15 @@ void Iteration::print() {
 
 	
 	cout << "Iteration Information:" << endl << "Dataset address:( " << this->d << ") Dataset values(" << this->d->values << "):" << endl;
-	cout << "K: " << this->k << endl;
-	cout << "Centroids: (" << this->centroids << "):" << endl;
-	for (int i = 0; i < this->k; i++)
-		cout << this->centroids[i] << " ";
+	cout << "KForIndividuals: " << this->KForIndividuals << endl;
+	cout << "Individual Centroids: (" << this->individualCentroids << "):" << endl;
+	for (int i = 0; i < this->KForIndividuals; i++)
+		cout << this->individualCentroids[i] << " ";
 	cout << endl;
+	cout << "Gene Centroids: (" << this->geneCentroids << "):" << endl;
+	for (int i = 0; i < this->KForGenes; i++)
+                cout << this->geneCentroids[i] << " ";
+        cout << endl;
 	cout << "IndividualSimilarityMeasure: " << this->individualSimilarityMeasure << endl;
 	cout << "GeneSimilarityMeasure: " << this->geneSimilarityMeasure << endl;
 	cout << "Fitness: " << this->fitness << endl << endl;

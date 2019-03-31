@@ -7,8 +7,10 @@ class Iteration {
 
 	private:
 		data * d;
-		int k;
-		int * centroids;
+		int KForIndividuals;
+		int KForGenes;
+		int * individualCentroids;
+		int * geneCentroids;
 		double individualSimilarityMeasure;
 		double geneSimilarityMeasure;
 		int fitness;
@@ -16,15 +18,29 @@ class Iteration {
 		int amountOfGenesClustered;
 
 	public:
+/*------------------------------------------------------------
+ *
+ *		Constructor and Destructor		
+ *
+-------------------------------------------------------------*/
 		Iteration(data *);
-		//Iteration(data *, int, long *, double, double);
 		~Iteration();
+
+/*------------------------------------------------------------
+ *
+ *		Getters and Setters
+ *
+-------------------------------------------------------------*/
 		data * getData();
 		void setData(data *);
-		int getK();
-		void setK(int);
-		int * getCentroids();
-		void setCentroids(int *);
+		int getKForIndividuals();
+		void setKForIndividuals(int);
+		int getKForGenes();
+		void setKForGenes(int);
+		int * getIndividualCentroids();
+		void setIndividualCentroids(int *);
+		int * getGeneCentroids();
+		void setGeneCentroids(int *);
 		double getIndividualSimilarityMeasure();
 		void setIndividualSimilarityMeasure(double);
 		double getGeneSimilarityMeasure();
@@ -35,6 +51,7 @@ class Iteration {
 		void setAmountOfIndividualsClustered(int);
 		int getAmountOfGenesClustered();
 		void setAmountOfGenesClustered(int);
+
 		void print();
 		
 		
