@@ -133,6 +133,7 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	offSpring->setFitness(rand() % 100);
 
 	clusterIndividuals(offSpring);
+	clusterGenes(offSpring);	
 
 	//offSpring->print();
 
@@ -148,6 +149,8 @@ static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populati
 		newPopulation[i] = reproduce(oldPopulation, populationSize, dataset);
 	
 	
+	//Generate bitmap heatmaps
+	/*	
 	for (int i = 0; i < populationSize; i++) {
 		if ((iterations % 10) == 0) {
 			string filename = "../results/";
@@ -156,6 +159,7 @@ static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populati
 		}
 		
 	}
+	*/
 
 	iterations++;
 	cout << "New population generated\n";

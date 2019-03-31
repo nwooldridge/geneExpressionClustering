@@ -15,6 +15,8 @@ static void moveIndividualToCentroid(data * d, int individualIndex, int centroid
 	
 	vector<double *> beforeArr;
 	vector<double *> afterArr;
+	
+	//cout << "before moving: " << d->values[ centroidIndividualIndex ];
 
 	if (individualIndex > centroidIndividualIndex)
 		afterArr.push_back(d->values[individualIndex]);
@@ -40,9 +42,18 @@ static void moveIndividualToCentroid(data * d, int individualIndex, int centroid
 		d->values[count] = afterArr[i];
 		count++;
 	}
+	
+	//cout << " after moving: " << d->values[ centroidIndividualIndex ] << endl;
 }
 
-double findIndividualSimilarityMeasure(data * d, double * individual, double * centroidIndividual) {
+static void moveGeneToCentroid(data * d, int geneIndex, int centroidGeneIndex) {
+
+
+
+
+}
+
+static double findIndividualSimilarityMeasure(data * d, double * individual, double * centroidIndividual) {
 	
 	double similarityMeasure = 0;
 	
@@ -56,11 +67,15 @@ double findIndividualSimilarityMeasure(data * d, double * individual, double * c
 
 }
 
-double findGeneSimilarityMeasure(data * d, double * gene, double * centroidGene) {
+static double findGeneSimilarityMeasure(data * d, int geneIndex, int centroidGeneIndex) {
 
 	
-	
+	double similarityMeasure = 0;
 
+	for (int i = 0; i < (d->numIndividuals); i++) 
+		similarityMeasure += abs((d->values[i][geneIndex]) - (d->values[i][centroidGeneIndex]));
+		
+	return similarityMeasure;
 }
 
 void clusterIndividuals(Iteration * iteration) {
@@ -116,5 +131,9 @@ void clusterGenes(Iteration * iteration) {
 	int * centroids = iteration->getCentroids();
 	double minSimilarityMeasure = iteration->getGeneSimilarityMeasure();
 
+	
+	for (i = 0; i < (d->numGenes - 1); i++)
+		cout << findGeneSimilarityMeasure(d, i, i + 1) << endl;
+	
 }
 

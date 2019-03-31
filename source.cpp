@@ -27,8 +27,12 @@ int main(int argc, char ** argv) {
 	data d = parse(s, atoi(argv[2]), atoi(argv[3]));
 	d.numIndividuals = atoi(argv[2]);
 	d.numGenes = atoi(argv[3]);
-
-
+	/*
+	for (int i = 0; i < d.numIndividuals; i++)
+		for (int j = 0; j < d.numGenes; j++)
+			cout << d.values[i][j] << " ";
+		cout << endl;
+	*/
 	geneticAlgorithm(100, &d, 50, 8);
 
 	for (int i = 0; i < d.numIndividuals; i++) {
