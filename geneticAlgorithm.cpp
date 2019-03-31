@@ -99,35 +99,48 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	//
 
 	if ((rand() % mutationRate) == 0) { //chance of mutation
-		offSpring->setK(rand() % (dataset->numIndividuals * 1/4 + 1) + 1);
+		offSpring->setKForIndividuals(rand() % (dataset->numIndividuals * 1/4 + 1) + 1);
 	}
 	else {//otherwise inherits from parents
 		//get k from random parent
-		offSpring->setK(parents[rand() % parentCount]->getK());
+		offSpring->setKForIndividuals(parents[rand() % parentCount]->getKForIndividuals());
 	}
 
+	if ((rand() % mutationRate) == 0)
+		offSpring->setKForGenes(rand() % (dataset->numGenes * 1/4 + 1) + 1);
+	else
+		offSpring->setKForGenes(parents[rand() % parentCount]->getKForGenes());
 
 	//
 	//
 	//getting centroids from parents
 	//
-	//
+	//TODO: Currently needs work. Cannot have duplicate centroid indices.
 
- 	int * centroids = new int[offSpring->getK()];
-
+ 	int * individualCentroids = new int[offSpring->getKForIndividuals()];
+	int * geneCentroids = new int[offSpring->getKForGenes()];
 	
-	for (i = 0; i < offSpring->getK(); i++) {
+	for (i = 0; i < offSpring->getKForIndividuals(); i++) {
 		if ((rand() % mutationRate) == 0) { //inherit mutated centroid (just random centroid)
-			centroids[i] = rand() % dataset->numIndividuals;
+			individualCentroids[i] = rand() % dataset->numIndividuals;
 		}
 		else { //inherit centroids from parents			
 			int parent = rand() % parentCount;
-			centroids[i] = parents[parent]->getCentroids()[rand() % (parents[parent]->getK())];
+			individualCentroids[i] = parents[parent]->getIndividualCentroids()[rand() % (parents[parent]->getKForIndividuals())];
+		}
+	}
+	for (i = 0; i < offSpring->getKForGenes(); i++) {
+		if ((rand() % mutationRate) == 0)
+			geneCentroids[i] = rand() % dataset->numGenes;
+		else {
+			int parent = rand() % parentCount;
+			geneCentroids[i] = parents[parent]->getGeneCentroids()[rand() % (parents[parent]->getKForGenes())];
 		}
 	}
 	
 
-	offSpring->setCentroids(centroids);
+	offSpring->setIndividualCentroids(individualCentroids);
+	offSpring->setGeneCentroids(geneCentroids);
 	offSpring->setIndividualSimilarityMeasure(findOptimalIndividualSimilarityMeasure(dataset));
 	offSpring->setGeneSimilarityMeasure(findOptimalGeneSimilarityMeasure(dataset));
 	offSpring->setFitness(rand() % 100);
@@ -135,7 +148,7 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	clusterIndividuals(offSpring);
 	clusterGenes(offSpring);	
 
-	//offSpring->print();
+	offSpring->print();
 
 	return offSpring;
 
@@ -178,8 +191,10 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 	for (int i = 0; i < populationSize; i++) {
 	
 		newPopulation[i] = new Iteration(copyData(dataSet));
-		newPopulation[i]->setK(5);		//rand() % (dataSet->numIndividuals - (1/4*(dataSet->numIndividuals))) + 5);
-		newPopulation[i]->setCentroids(new int[newPopulation[i]->getK()]);
+		newPopulation[i]->setKForIndividuals(5);		//rand() % (dataSet->numIndividuals - (1/4*(dataSet->numIndividuals))) + 5);
+		newPopulation[i]->setKForGenes(5);
+		newPopulation[i]->setIndividualCentroids(new int[newPopulation[i]->getKForIndividuals()]);
+		newPopulation[i]->setGeneCentroids(new int[newPopulation[i]->getKForGenes()]);
 		newPopulation[i]->setIndividualSimilarityMeasure(5);
 		newPopulation[i]->setGeneSimilarityMeasure(5);
 		
@@ -187,7 +202,7 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 	
 		vector<int> usedNumbers;
 
-		for (int j = 0; j < (newPopulation[i]->getK()); j++) {
+		for (int j = 0; j < (newPopulation[i]->getKForIndividuals()); j++) {
 			bool isDuplicate = false;
 			int centroid = rand() % dataSet->numIndividuals;
 			for (int k = 0; k < usedNumbers.size(); k++) 
@@ -197,12 +212,31 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 				}
 		
 			if (!isDuplicate) {
-				newPopulation[i]->getCentroids()[j] = centroid;
+				newPopulation[i]->getIndividualCentroids()[j] = centroid;
 				usedNumbers.push_back(centroid);
 			}
 			else
 				j--;
 		}
+
+		//set centroids to random genes
+
+		usedNumbers.clear();
+		for (int j = 0; j < (newPopulation[i]->getKForGenes()); j++) {
+			bool isDuplicate = false;
+			int centroid = rand() % dataSet->numGenes;
+			for (int k = 0; k < usedNumbers.size(); k++)
+				if (centroid == usedNumbers[k]) {
+					isDuplicate = true;
+					break;
+				}
+			if (!isDuplicate) {
+				newPopulation[i]->getGeneCentroids()[j] = centroid;
+				usedNumbers.push_back(centroid);
+			}
+			else
+				j--;
+		}	
 		
 		newPopulation[i]->setFitness(rand() % 100);
 

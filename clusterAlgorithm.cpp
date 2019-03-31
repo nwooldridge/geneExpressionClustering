@@ -85,7 +85,7 @@ void clusterIndividuals(Iteration * iteration) {
 	int i;
 
 	data * d = iteration->getData();
-	int k = iteration->getK();
+	int k = iteration->getKForIndividuals();
 	int * centroids = iteration->getIndividualCentroids();
 	double minSimilarityMeasure = iteration->getIndividualSimilarityMeasure();
 		
@@ -129,13 +129,9 @@ void clusterGenes(Iteration * iteration) {
 	int i;
 
 	data * d = iteration->getData();
-	int k = iteration->getK();
+	int k = iteration->getKForGenes();
 	int * centroids = iteration->getGeneCentroids();
-	double minSimilarityMeasure = iteration->getGeneSimilarityMeasure();
+	double minSimilarityMeasure = iteration->getGeneSimilarityMeasure();	
 
-	
-	for (i = 0; i < (d->numGenes - 1); i++)
-		cout << findGeneSimilarityMeasure(d, i, i + 1) << endl;
-	
 }
 

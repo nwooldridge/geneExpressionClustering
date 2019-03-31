@@ -49,6 +49,7 @@ void Iteration::print() {
 	for (int i = 0; i < this->KForIndividuals; i++)
 		cout << this->individualCentroids[i] << " ";
 	cout << endl;
+	cout << "KForGenes: " << this->KForGenes << endl;
 	cout << "Gene Centroids: (" << this->geneCentroids << "):" << endl;
 	for (int i = 0; i < this->KForGenes; i++)
                 cout << this->geneCentroids[i] << " ";
