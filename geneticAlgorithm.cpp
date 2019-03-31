@@ -115,27 +115,60 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	//
 	//getting centroids from parents
 	//
-	//TODO: Currently needs work. Cannot have duplicate centroid indices.
+	//
 
  	int * individualCentroids = new int[offSpring->getKForIndividuals()];
 	int * geneCentroids = new int[offSpring->getKForGenes()];
 	
+
+	//Keep track of used values so no duplicates are generated
+	vector <int> usedValues;
+	
 	for (i = 0; i < offSpring->getKForIndividuals(); i++) {
+		bool isDuplicate = false;
+		int centroid = 0;
 		if ((rand() % mutationRate) == 0) { //inherit mutated centroid (just random centroid)
-			individualCentroids[i] = rand() % dataset->numIndividuals;
+			centroid = rand() % dataset->numIndividuals;
 		}
 		else { //inherit centroids from parents			
 			int parent = rand() % parentCount;
-			individualCentroids[i] = parents[parent]->getIndividualCentroids()[rand() % (parents[parent]->getKForIndividuals())];
+			centroid = parents[parent]->getIndividualCentroids()[rand() % (parents[parent]->getKForIndividuals())];
 		}
+		for (j = 0; j < usedValues.size(); j++)
+			if (centroid == usedValues[j]) {
+				isDuplicate = true;
+				break;
+			}
+		if (!isDuplicate) {
+			individualCentroids[i] = centroid;
+			usedValues.push_back(centroid);
+		}
+		else
+			i--;
 	}
+	
+	//Do same thing as above except for the centroids for genes
+	usedValues.clear();
 	for (i = 0; i < offSpring->getKForGenes(); i++) {
+		bool isDuplicate = false;
+		int centroid = 0;
 		if ((rand() % mutationRate) == 0)
-			geneCentroids[i] = rand() % dataset->numGenes;
+			centroid = rand() % dataset->numGenes;
 		else {
 			int parent = rand() % parentCount;
-			geneCentroids[i] = parents[parent]->getGeneCentroids()[rand() % (parents[parent]->getKForGenes())];
+			centroid = parents[parent]->getGeneCentroids()[rand() % (parents[parent]->getKForGenes())];
 		}
+		for (j = 0; j < usedValues.size(); j++)
+			if (usedValues[j] == centroid) {
+				isDuplicate = true;
+				break;
+			}
+		if (!isDuplicate) {
+			geneCentroids[i] = centroid;
+			usedValues.push_back(centroid);
+		}	
+		else
+			i--;
 	}
 	
 

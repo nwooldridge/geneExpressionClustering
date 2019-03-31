@@ -49,7 +49,7 @@ static void moveIndividualToCentroid(data * d, int individualIndex, int centroid
 static void moveGeneToCentroid(data * d, int geneIndex, int centroidGeneIndex) {
 
 
-
+	cout << "Moving gene " << geneIndex << " to gene centroid " << centroidGeneIndex << endl;
 
 }
 
@@ -82,7 +82,7 @@ static double findGeneSimilarityMeasure(data * d, int geneIndex, int centroidGen
 
 void clusterIndividuals(Iteration * iteration) {
 
-	int i;
+	int i, j;
 
 	data * d = iteration->getData();
 	int k = iteration->getKForIndividuals();
@@ -93,7 +93,7 @@ void clusterIndividuals(Iteration * iteration) {
 
 		//checks if individual is a centroid		
 		bool isCentroid = false;
-		for (int j = 0; j < k; j++)
+		for (j = 0; j < k; j++)
 			if (centroids[j] == i)
 				isCentroid = true;
 		if (isCentroid)
@@ -103,7 +103,7 @@ void clusterIndividuals(Iteration * iteration) {
 		//if less than minSimilarityMeasure then individual is moved to centroid
 		double mostRelatedSimilarityMeasure = 10000000;
 		int mostRelatedCentroid;
-		for (int j = 0; j < k; j++) {
+		for (j = 0; j < k; j++) {
 			
 			//if lower similarityMeasure is found then keep track of that centroid	
 			if (findIndividualSimilarityMeasure(d, d->values[i], d->values[ centroids[j] ]) < mostRelatedSimilarityMeasure) {
@@ -126,12 +126,36 @@ void clusterIndividuals(Iteration * iteration) {
 
 void clusterGenes(Iteration * iteration) {
 
-	int i;
+	int i, j;
 
 	data * d = iteration->getData();
 	int k = iteration->getKForGenes();
 	int * centroids = iteration->getGeneCentroids();
 	double minSimilarityMeasure = iteration->getGeneSimilarityMeasure();	
 
+	for (i = 0; i < d->numGenes; i++) {
+
+		bool isCentroid = false;
+		for (j = 0; j < k; j++)
+			if (centroids[j] == i)
+				isCentroid = true;
+		if (isCentroid)
+			continue;		
+		
+		double mostRelatedSimilarityMeasure = 100000;
+		int mostRelatedCentroid;
+
+		for (j = 0; j < k; j++) 
+			if (findGeneSimilarityMeasure(d, i, centroids[j] ) < mostRelatedSimilarityMeasure) {
+				mostRelatedSimilarityMeasure = findGeneSimilarityMeasure(d, i, centroids[j] );
+				mostRelatedCentroid = centroids[j];
+
+			}
+
+		if (mostRelatedSimilarityMeasure <= minSimilarityMeasure)
+			moveGeneToCentroid(d, i, mostRelatedCentroid);
+
+	}
+	
 }
 
