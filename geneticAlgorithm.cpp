@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <vector>
+#include <cmath>
 
 #include "data.h"
 #include "clusterAlgorithm.h"
@@ -12,16 +13,45 @@ using namespace std;
 
 int mutationRate;
 long iterations = 0;
+long totalIterations;
+double dataStandardDeviation;
 
+//Find standard deviation of data to better match similar data up
+static double findStandardDeviation(data * d) {
 
-//TODO: figure out how to find optimalSimilarityMeasures
+	int i, j;
+
+        vector <double> squaredDifferences; 
+	double averageGeneExpression = 0;
+        for (i = 0; i < d->numIndividuals; i++)
+                for (j = 0; j < d->numGenes; j++)
+                        averageGeneExpression += d->values[i][j];
+        averageGeneExpression = averageGeneExpression / (d->numIndividuals * d->numGenes);
+
+        for (i = 0; i < d->numIndividuals; i++)
+                for (j = 0; j < d->numGenes; j++)
+                        squaredDifferences.push_back(pow((d->values[i][j] - averageGeneExpression) , 2));
+
+        double averageSquaredDifferences = 0;
+        for (i = 0; i < squaredDifferences.size(); i++)
+                averageSquaredDifferences += squaredDifferences[i];
+        averageSquaredDifferences = averageSquaredDifferences / squaredDifferences.size();
+
+        double standardDeviation = sqrt(averageSquaredDifferences);
+
+	return standardDeviation;
+
+}
+
+//Optimal similarity measure determined by halving the standard deviation of data 
+//and multiplying it by the amount of individuals or genes
 static double findOptimalIndividualSimilarityMeasure(data * d) {
-	double x = 5;
-	return x;
+
+	return (d->numIndividuals * dataStandardDeviation * 1/2);
 }
 static double findOptimalGeneSimilarityMeasure(data * d) {
-	double x = 5;
-	return x;
+	
+	return (d->numGenes * dataStandardDeviation * 1/2);
 }
 	
 //copies data set and returns copy
@@ -34,12 +64,11 @@ static data * copyData(data * d) {
 	newCopy->numGenes = d->numGenes;
 
 	newCopy->values = new double*[d->numIndividuals];
-	for (i = 0; i < d->numIndividuals; i++) 
+	for (i = 0; i < d->numIndividuals; i++) {
 		newCopy->values[i] = new double[d->numGenes];
-	
-	for (i = 0; i < d->numIndividuals; i++)
 		for (j = 0; j < d->numGenes; j++)
-			newCopy->values[i][j] = d->values[i][j];
+                	newCopy->values[i][j] = d->values[i][j];
+	}
 
 	return newCopy;
 }
@@ -176,6 +205,9 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	offSpring->setGeneCentroids(geneCentroids);
 	offSpring->setIndividualSimilarityMeasure(findOptimalIndividualSimilarityMeasure(dataset));
 	offSpring->setGeneSimilarityMeasure(findOptimalGeneSimilarityMeasure(dataset));
+
+	//TODO: need to find a way to set the fitness of each iteration. The fitness will be
+	//determined on how well the data itself is clustered
 	offSpring->setFitness(rand() % 100);
 
 	clusterIndividuals(offSpring);
@@ -196,16 +228,20 @@ static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populati
 	
 	
 	//Generate bitmap heatmaps
-	/*	
+	//This is very slow, I may just have to output csv files and just 
+	//view them in Excel with conditional formatting for the heatmap
+	
+	
+	cout << "Current iteration: " << iterations << " Total Iterations: " << totalIterations << endl;
 	for (int i = 0; i < populationSize; i++) {
-		if ((iterations % 10) == 0) {
+		if (iterations == (totalIterations - 1)) {
 			string filename = "../results/";
-			filename += ("pop" + to_string(iterations) + "iteration" + to_string(i) + ".bmp");
+			filename += ("generation" + to_string(iterations) + "iteration" + to_string(i) + ".bmp");
 			generateBMP(newPopulation[i]->getData(), filename);
 		}
 		
 	}
-	*/
+	
 
 	iterations++;
 	cout << "New population generated\n";
@@ -224,12 +260,12 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 	for (int i = 0; i < populationSize; i++) {
 	
 		newPopulation[i] = new Iteration(copyData(dataSet));
-		newPopulation[i]->setKForIndividuals(5);		//rand() % (dataSet->numIndividuals - (1/4*(dataSet->numIndividuals))) + 5);
-		newPopulation[i]->setKForGenes(5);
+		newPopulation[i]->setKForIndividuals(rand() % (dataSet->numIndividuals * 1/4 + 1) + 1);		//rand() % (dataSet->numIndividuals - (1/4*(dataSet->numIndividuals))) + 5);
+		newPopulation[i]->setKForGenes(rand() % (dataSet->numGenes * 1/4 + 1) + 1);
 		newPopulation[i]->setIndividualCentroids(new int[newPopulation[i]->getKForIndividuals()]);
 		newPopulation[i]->setGeneCentroids(new int[newPopulation[i]->getKForGenes()]);
-		newPopulation[i]->setIndividualSimilarityMeasure(5);
-		newPopulation[i]->setGeneSimilarityMeasure(5);
+		newPopulation[i]->setIndividualSimilarityMeasure(findOptimalIndividualSimilarityMeasure(dataSet));
+		newPopulation[i]->setGeneSimilarityMeasure(findOptimalGeneSimilarityMeasure(dataSet));
 		
 		//set centroids to random individuals
 	
@@ -271,7 +307,7 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 				j--;
 		}	
 		
-		newPopulation[i]->setFitness(rand() % 100);
+		newPopulation[i]->setFitness(1);
 
 	}
 	return newPopulation;	
@@ -284,6 +320,10 @@ void geneticAlgorithm(long iterations, data * dataSet, int populationSize, int c
 	srand(time(NULL));	
 	
 	mutationRate = chanceOfMutation;
+
+	totalIterations = iterations;
+	
+	dataStandardDeviation = findStandardDeviation(dataSet);
 
 	Iteration ** population = initializePopulation(dataSet, populationSize);
 	

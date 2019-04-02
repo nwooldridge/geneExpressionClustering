@@ -18,30 +18,43 @@ static void moveIndividualToCentroid(data * d, int individualIndex, int centroid
 	
 	//cout << "before moving: " << d->values[ centroidIndividualIndex ];
 
-	if (individualIndex > centroidIndividualIndex)
+	if (individualIndex > centroidIndividualIndex) {
 		afterArr.push_back(d->values[individualIndex]);
+		
+		for (i = 0; i < centroidIndividualIndex; i++)
+                	if (i != individualIndex)
+                        	beforeArr.push_back(d->values[i]);
+		for (i = centroidIndividualIndex + 1; i < d->numIndividuals; i++)
+              		if (i != individualIndex)
+                        	afterArr.push_back(d->values[i]);
+		beforeArr.push_back(d->values[centroidIndividualIndex]);
+		
+	}
+	else {
+		afterArr.push_back(d->values[centroidIndividualIndex]);
 
-	for (i = 0; i < centroidIndividualIndex; i++) 
-		if (i != individualIndex) 
-			beforeArr.push_back(d->values[i]);
+		for (i = 0; i < centroidIndividualIndex; i++) 
+			if (i != individualIndex) 
+				beforeArr.push_back(d->values[i]);
 	
-	for (i = centroidIndividualIndex + 1; i < d->numIndividuals; i++)
-		if (i != individualIndex)
-			afterArr.push_back(d->values[i]);
+		for (i = centroidIndividualIndex + 1; i < d->numIndividuals; i++)
+			if (i != individualIndex)
+				afterArr.push_back(d->values[i]);
 
-	if (individualIndex < centroidIndividualIndex)
 		beforeArr.push_back(d->values[individualIndex]);		
+	}
 	
-	long count = 0;
+	int count = 0;
 	for (i = 0; i < beforeArr.size(); i++) {
 		d->values[count] = beforeArr[i];
 		count++;
 	}
-	count++;
+	
 	for (i = 0; i < afterArr.size(); i++) {
 		d->values[count] = afterArr[i];
 		count++;
 	}
+	
 	
 	//cout << " after moving: " << d->values[ centroidIndividualIndex ] << endl;
 }
@@ -49,7 +62,61 @@ static void moveIndividualToCentroid(data * d, int individualIndex, int centroid
 static void moveGeneToCentroid(data * d, int geneIndex, int centroidGeneIndex) {
 
 
-	cout << "Moving gene " << geneIndex << " to gene centroid " << centroidGeneIndex << endl;
+	//cout << "Moving gene " << geneIndex << " to gene centroid " << centroidGeneIndex << endl;
+	
+
+	int i, j;
+
+	//creates duplicate array except essentially rows and columns are switched, so I can move rows of
+	//genes around like I moved the individuals around in the other function	
+	double ** swappedArr = new double*[d->numGenes];
+	for (i = 0; i < d->numGenes; i++) {
+		swappedArr[i] = new double[d->numIndividuals];
+		for (j = 0; j < d->numIndividuals; j++) {
+			swappedArr[i][j] = d->values[j][i];
+		}
+	}
+	vector <double *> beforeArr, afterArr;
+	
+	if (geneIndex > centroidGeneIndex) {
+		afterArr.push_back(swappedArr[geneIndex]);
+
+		for (i = 0; i < centroidGeneIndex; i++)
+        	        if (i != geneIndex)
+                       		beforeArr.push_back(swappedArr[i]);
+		for (i = centroidGeneIndex + 1; i < d->numGenes; i++)
+                	if (i != geneIndex)
+                        	afterArr.push_back(swappedArr[i]);
+		beforeArr.push_back(swappedArr[centroidGeneIndex]);
+	}
+	else {
+		afterArr.push_back(swappedArr[centroidGeneIndex]);
+		for (i = 0; i < centroidGeneIndex; i++)
+                	if (i != geneIndex)
+                        	beforeArr.push_back(swappedArr[i]);		
+		for (i = centroidGeneIndex + 1; i < d->numGenes; i++)
+                	if (i != geneIndex)
+                        	afterArr.push_back(swappedArr[i]);
+		beforeArr.push_back(swappedArr[geneIndex]);
+	}
+
+	int count = 0;
+	for (i = 0; i < beforeArr.size(); i++) {
+		swappedArr[count] = beforeArr[i];
+		count++;
+	}
+	for (i = 0; i < afterArr.size(); i++) {
+		swappedArr[count] = afterArr[i];
+		count++;
+	}
+
+	for (i = 0; i < d->numIndividuals; i++)
+		for (j = 0; j < d->numGenes; j++)
+			d->values[i][j] = swappedArr[j][i];
+		
+	for (i = 0; i < d->numGenes; i++)
+		delete[] swappedArr[i];
+	delete[] swappedArr;	
 
 }
 
@@ -88,6 +155,8 @@ void clusterIndividuals(Iteration * iteration) {
 	int k = iteration->getKForIndividuals();
 	int * centroids = iteration->getIndividualCentroids();
 	double minSimilarityMeasure = iteration->getIndividualSimilarityMeasure();
+
+	int numOfIndividualsMoved = 0;
 		
 	for (i = 0; i < d->numIndividuals; i++) {
 
@@ -117,11 +186,13 @@ void clusterIndividuals(Iteration * iteration) {
 		//given minimumSimilarityMeasure
 		//if less than, the individual will be moved to that centroid
 		if (mostRelatedSimilarityMeasure <= minSimilarityMeasure) {
-	
-			//cout << "Individual " << i << " being moved to centroid " << mostRelatedCentroid << endl;	
-			moveIndividualToCentroid(d, i, mostRelatedCentroid);
+			numOfIndividualsMoved++;
+			if (abs(i - mostRelatedCentroid) > 1)
+				moveIndividualToCentroid(d, i, mostRelatedCentroid);
 		}
 	}
+
+	iteration->setAmountOfIndividualsClustered(numOfIndividualsMoved);
 }
 
 void clusterGenes(Iteration * iteration) {
@@ -133,6 +204,8 @@ void clusterGenes(Iteration * iteration) {
 	int * centroids = iteration->getGeneCentroids();
 	double minSimilarityMeasure = iteration->getGeneSimilarityMeasure();	
 
+	int numOfGenesMoved = 0;
+	
 	for (i = 0; i < d->numGenes; i++) {
 
 		bool isCentroid = false;
@@ -151,11 +224,19 @@ void clusterGenes(Iteration * iteration) {
 				mostRelatedCentroid = centroids[j];
 
 			}
-
-		if (mostRelatedSimilarityMeasure <= minSimilarityMeasure)
-			moveGeneToCentroid(d, i, mostRelatedCentroid);
+		
+		if (mostRelatedSimilarityMeasure <= minSimilarityMeasure) {
+			numOfGenesMoved++;
+			if (abs(i - mostRelatedCentroid) > 1)
+				moveGeneToCentroid(d, i, mostRelatedCentroid);
+			
+		}
 
 	}
+	
+	iteration->setAmountOfGenesClustered(numOfGenesMoved);
+
+	
 	
 }
 

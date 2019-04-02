@@ -56,6 +56,8 @@ void Iteration::print() {
         cout << endl;
 	cout << "IndividualSimilarityMeasure: " << this->individualSimilarityMeasure << endl;
 	cout << "GeneSimilarityMeasure: " << this->geneSimilarityMeasure << endl;
+	cout << "Amount of Individuals clustered: " << this->amountOfIndividualsClustered << endl;
+	cout << "Amount of Genes clustered: " << amountOfGenesClustered << endl;
 	cout << "Fitness: " << this->fitness << endl << endl;
 
 }
