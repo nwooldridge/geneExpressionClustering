@@ -26,10 +26,10 @@ int Iteration::getKForIndividuals() {				return this->KForIndividuals;}
 void Iteration::setKForIndividuals(int k) {			this->KForIndividuals = k;}
 int Iteration::getKForGenes() {					return this->KForGenes;}
 void Iteration::setKForGenes(int k) {				this->KForGenes = k;}
-int * Iteration::getIndividualCentroids() {			return this->individualCentroids;}
-void Iteration::setIndividualCentroids(int * ptr) {		this->individualCentroids = ptr;}
-int * Iteration::getGeneCentroids() {				return this->geneCentroids;}
-void Iteration::setGeneCentroids(int * ptr) {			this->geneCentroids = ptr;}
+cluster * Iteration::getIndividualCentroids() {			return this->individualCentroids;}
+void Iteration::setIndividualCentroids(cluster * ptr) {		this->individualCentroids = ptr;}
+cluster * Iteration::getGeneCentroids() {			return this->geneCentroids;}
+void Iteration::setGeneCentroids(cluster * ptr) {		this->geneCentroids = ptr;}
 double Iteration::getIndividualSimilarityMeasure() {		return this->individualSimilarityMeasure;}
 void Iteration::setIndividualSimilarityMeasure(double x) {	this->individualSimilarityMeasure = x;}
 double Iteration::getGeneSimilarityMeasure() {			return this->geneSimilarityMeasure;}
@@ -45,15 +45,24 @@ void Iteration::print() {
 	
 	cout << "Iteration Information:" << endl << "Dataset address:( " << this->d << ") Dataset values(" << this->d->values << "):" << endl;
 	cout << "KForIndividuals: " << this->KForIndividuals << endl;
-	cout << "Individual Centroids: (" << this->individualCentroids << "):" << endl;
-	for (int i = 0; i < this->KForIndividuals; i++)
-		cout << this->individualCentroids[i] << " ";
+	cout << "Individual Centroids (" << this->individualCentroids << "):" << endl;
+	for (int i = 0; i < this->KForIndividuals; i++) {
+		cout << "\tIndex: " << this->individualCentroids[i].index << endl;
+		cout << "\tCluster size: " << this->individualCentroids[i].clusterSize << endl;
+		if (this->individualCentroids[i].clusterSize > 0)
+			cout << "\tBounds: (" << this->individualCentroids[i].lowerBoundIndex << " - " << this->individualCentroids[i].upperBoundIndex << ")" << endl;
+	cout << endl;
+	}
 	cout << endl;
 	cout << "KForGenes: " << this->KForGenes << endl;
-	cout << "Gene Centroids: (" << this->geneCentroids << "):" << endl;
-	for (int i = 0; i < this->KForGenes; i++)
-                cout << this->geneCentroids[i] << " ";
-        cout << endl;
+	cout << "Gene Centroids (" << this->geneCentroids << "):" << endl;
+	for (int i = 0; i < this->KForGenes; i++) {
+                cout << "\tIndex: " << this->geneCentroids[i].index << endl;
+		cout << "\tCluster size: " << this->geneCentroids[i].clusterSize << endl;
+		if (this->geneCentroids[i].clusterSize > 0)
+			cout << "\tBounds: (" << this->geneCentroids[i].lowerBoundIndex << " - " <<  this->geneCentroids[i].upperBoundIndex << ")" << endl;
+	cout << endl;
+	}
 	cout << "IndividualSimilarityMeasure: " << this->individualSimilarityMeasure << endl;
 	cout << "GeneSimilarityMeasure: " << this->geneSimilarityMeasure << endl;
 	cout << "Amount of Individuals clustered: " << this->amountOfIndividualsClustered << endl;

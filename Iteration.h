@@ -3,14 +3,21 @@
 #ifndef ITERATION_H
 #define ITERATION_H
 
+struct cluster {
+	int index;
+	int lowerBoundIndex;
+	int upperBoundIndex;
+	int clusterSize;
+};
+
 class Iteration {
 
 	private:
 		data * d;
 		int KForIndividuals;
 		int KForGenes;
-		int * individualCentroids;
-		int * geneCentroids;
+		cluster * individualCentroids;
+		cluster * geneCentroids;
 		double individualSimilarityMeasure;
 		double geneSimilarityMeasure;
 		int fitness;
@@ -19,17 +26,13 @@ class Iteration {
 
 	public:
 /*------------------------------------------------------------
- *
  *		Constructor and Destructor		
- *
 -------------------------------------------------------------*/
 		Iteration(data *);
 		~Iteration();
 
 /*------------------------------------------------------------
- *
  *		Getters and Setters
- *
 -------------------------------------------------------------*/
 		data * getData();
 		void setData(data *);
@@ -37,10 +40,12 @@ class Iteration {
 		void setKForIndividuals(int);
 		int getKForGenes();
 		void setKForGenes(int);
-		int * getIndividualCentroids();
-		void setIndividualCentroids(int *);
-		int * getGeneCentroids();
-		void setGeneCentroids(int *);
+
+		cluster * getIndividualCentroids();
+		void setIndividualCentroids(cluster *);
+		cluster * getGeneCentroids();
+		void setGeneCentroids(cluster *);
+
 		double getIndividualSimilarityMeasure();
 		void setIndividualSimilarityMeasure(double);
 		double getGeneSimilarityMeasure();

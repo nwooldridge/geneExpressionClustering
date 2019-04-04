@@ -33,7 +33,7 @@ int main(int argc, char ** argv) {
 			cout << d.values[i][j] << " ";
 		cout << endl;
 	*/
-	geneticAlgorithm(100, &d, 50, 8);
+	geneticAlgorithm(50, &d, 25, 8);
 
 	for (int i = 0; i < d.numIndividuals; i++) {
 		delete[] d.values[i];

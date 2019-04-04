@@ -20,38 +20,36 @@ double dataStandardDeviation;
 static double findStandardDeviation(data * d) {
 
 	int i, j;
-
-        vector <double> squaredDifferences; 
+ 
 	double averageGeneExpression = 0;
         for (i = 0; i < d->numIndividuals; i++)
                 for (j = 0; j < d->numGenes; j++)
                         averageGeneExpression += d->values[i][j];
         averageGeneExpression = averageGeneExpression / (d->numIndividuals * d->numGenes);
 
+	double squaredDifferences = 0;
+
         for (i = 0; i < d->numIndividuals; i++)
                 for (j = 0; j < d->numGenes; j++)
-                        squaredDifferences.push_back(pow((d->values[i][j] - averageGeneExpression) , 2));
+                        squaredDifferences += pow((d->values[i][j] - averageGeneExpression) , 2);
+	squaredDifferences = squaredDifferences / (d->numIndividuals * d->numGenes);
 
-        double averageSquaredDifferences = 0;
-        for (i = 0; i < squaredDifferences.size(); i++)
-                averageSquaredDifferences += squaredDifferences[i];
-        averageSquaredDifferences = averageSquaredDifferences / squaredDifferences.size();
-
-        double standardDeviation = sqrt(averageSquaredDifferences);
-
-	return standardDeviation;
+	return sqrt(squaredDifferences);
 
 }
+//TODO: Improve finding optimal similarity measures. I still have almost 100% of 
+//individuals being clustered. I think outliers are skewing the standard deviation 
+//and making the data appear further apart than it is
 
 //Optimal similarity measure determined by halving the standard deviation of data 
 //and multiplying it by the amount of individuals or genes
 static double findOptimalIndividualSimilarityMeasure(data * d) {
 
-	return (d->numIndividuals * dataStandardDeviation * 1/2);
+	return (d->numIndividuals * dataStandardDeviation * 1/100);
 }
 static double findOptimalGeneSimilarityMeasure(data * d) {
 	
-	return (d->numGenes * dataStandardDeviation * 1/2);
+	return (d->numGenes * dataStandardDeviation * 1/4);
 }
 	
 //copies data set and returns copy
@@ -140,16 +138,16 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	else
 		offSpring->setKForGenes(parents[rand() % parentCount]->getKForGenes());
 
-	//
-	//
-	//getting centroids from parents
-	//
-	//
+	//------------------------------//
+	//				//
+	//getting centroids from parents//
+	//				//
+	//------------------------------//
 
- 	int * individualCentroids = new int[offSpring->getKForIndividuals()];
-	int * geneCentroids = new int[offSpring->getKForGenes()];
+	cluster * individualCentroids = new cluster[offSpring->getKForIndividuals()];
+	cluster * geneCentroids = new cluster[offSpring->getKForGenes()];
 	
-
+		
 	//Keep track of used values so no duplicates are generated
 	vector <int> usedValues;
 	
@@ -161,7 +159,7 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 		}
 		else { //inherit centroids from parents			
 			int parent = rand() % parentCount;
-			centroid = parents[parent]->getIndividualCentroids()[rand() % (parents[parent]->getKForIndividuals())];
+			centroid = parents[parent]->getIndividualCentroids()[rand() % (parents[parent]->getKForIndividuals())].index;
 		}
 		for (j = 0; j < usedValues.size(); j++)
 			if (centroid == usedValues[j]) {
@@ -169,7 +167,7 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 				break;
 			}
 		if (!isDuplicate) {
-			individualCentroids[i] = centroid;
+			individualCentroids[i].index = centroid;
 			usedValues.push_back(centroid);
 		}
 		else
@@ -185,7 +183,7 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 			centroid = rand() % dataset->numGenes;
 		else {
 			int parent = rand() % parentCount;
-			centroid = parents[parent]->getGeneCentroids()[rand() % (parents[parent]->getKForGenes())];
+			centroid = parents[parent]->getGeneCentroids()[rand() % (parents[parent]->getKForGenes())].index;
 		}
 		for (j = 0; j < usedValues.size(); j++)
 			if (usedValues[j] == centroid) {
@@ -193,24 +191,45 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 				break;
 			}
 		if (!isDuplicate) {
-			geneCentroids[i] = centroid;
+			geneCentroids[i].index = centroid;
 			usedValues.push_back(centroid);
 		}	
 		else
 			i--;
 	}
-	
 
+	//Initialize these values for clustering algorithm to set them
+	for (i = 0; i < offSpring->getKForIndividuals(); i++) {
+                individualCentroids[i].lowerBoundIndex = individualCentroids[i].index;
+                individualCentroids[i].upperBoundIndex = individualCentroids[i].index;
+                individualCentroids[i].clusterSize = 0;
+        }
+        for (i = 0; i < offSpring->getKForGenes(); i++) {
+                geneCentroids[i].lowerBoundIndex = geneCentroids[i].index;
+                geneCentroids[i].upperBoundIndex = geneCentroids[i].index;
+                geneCentroids[i].clusterSize = 0;
+        }
+	
+	//TODO: Modify to set values to new struct created for clusters
 	offSpring->setIndividualCentroids(individualCentroids);
 	offSpring->setGeneCentroids(geneCentroids);
-	offSpring->setIndividualSimilarityMeasure(findOptimalIndividualSimilarityMeasure(dataset));
-	offSpring->setGeneSimilarityMeasure(findOptimalGeneSimilarityMeasure(dataset));
+
+
+	offSpring->setIndividualSimilarityMeasure(parents[0]->getIndividualSimilarityMeasure());
+	offSpring->setGeneSimilarityMeasure(parents[0]->getGeneSimilarityMeasure());
 
 	//TODO: need to find a way to set the fitness of each iteration. The fitness will be
 	//determined on how well the data itself is clustered
 	offSpring->setFitness(rand() % 100);
-
+	
+	//for (i = 0; i < offSpring->getData()->numIndividuals; i++)
+		//cout << offSpring->getData()->values[i] << " ";
+	//cout << endl << endl;
 	clusterIndividuals(offSpring);
+	//for (i = 0; i < offSpring->getData()->numIndividuals; i++)
+                //cout << offSpring->getData()->values[i] << " ";
+        //cout << endl << endl;
+
 	clusterGenes(offSpring);	
 
 	offSpring->print();
@@ -228,10 +247,11 @@ static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populati
 	
 	
 	//Generate bitmap heatmaps
+	//TODO
 	//This is very slow, I may just have to output csv files and just 
 	//view them in Excel with conditional formatting for the heatmap
 	
-	
+	/*	
 	cout << "Current iteration: " << iterations << " Total Iterations: " << totalIterations << endl;
 	for (int i = 0; i < populationSize; i++) {
 		if (iterations == (totalIterations - 1)) {
@@ -241,6 +261,7 @@ static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populati
 		}
 		
 	}
+	*/
 	
 
 	iterations++;
@@ -262,8 +283,8 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 		newPopulation[i] = new Iteration(copyData(dataSet));
 		newPopulation[i]->setKForIndividuals(rand() % (dataSet->numIndividuals * 1/4 + 1) + 1);		//rand() % (dataSet->numIndividuals - (1/4*(dataSet->numIndividuals))) + 5);
 		newPopulation[i]->setKForGenes(rand() % (dataSet->numGenes * 1/4 + 1) + 1);
-		newPopulation[i]->setIndividualCentroids(new int[newPopulation[i]->getKForIndividuals()]);
-		newPopulation[i]->setGeneCentroids(new int[newPopulation[i]->getKForGenes()]);
+		newPopulation[i]->setIndividualCentroids(new cluster[newPopulation[i]->getKForIndividuals()]);
+		newPopulation[i]->setGeneCentroids(new cluster[newPopulation[i]->getKForGenes()]);
 		newPopulation[i]->setIndividualSimilarityMeasure(findOptimalIndividualSimilarityMeasure(dataSet));
 		newPopulation[i]->setGeneSimilarityMeasure(findOptimalGeneSimilarityMeasure(dataSet));
 		
@@ -281,7 +302,7 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 				}
 		
 			if (!isDuplicate) {
-				newPopulation[i]->getIndividualCentroids()[j] = centroid;
+				newPopulation[i]->getIndividualCentroids()[j].index = centroid;
 				usedNumbers.push_back(centroid);
 			}
 			else
@@ -300,7 +321,7 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 					break;
 				}
 			if (!isDuplicate) {
-				newPopulation[i]->getGeneCentroids()[j] = centroid;
+				newPopulation[i]->getGeneCentroids()[j].index = centroid;
 				usedNumbers.push_back(centroid);
 			}
 			else
@@ -327,9 +348,6 @@ void geneticAlgorithm(long iterations, data * dataSet, int populationSize, int c
 
 	Iteration ** population = initializePopulation(dataSet, populationSize);
 	
-	population = createNewPopulation(population, populationSize, dataSet);
-	
-			
 	for (long i = 0; i < iterations; i++) {
 		
 		population = createNewPopulation(population, populationSize, dataSet);
