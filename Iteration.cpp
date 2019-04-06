@@ -40,6 +40,7 @@ int Iteration::getAmountOfIndividualsClustered() {		return this->amountOfIndivid
 void Iteration::setAmountOfIndividualsClustered(int x) {	this->amountOfIndividualsClustered = x;}
 int Iteration::getAmountOfGenesClustered() {			return this->amountOfGenesClustered;}
 void Iteration::setAmountOfGenesClustered(int x) {		this->amountOfGenesClustered = x;}
+int Iteration::getAmountOfIndividualsAndGenesClustered() {	return (this->amountOfIndividualsClustered + this->amountOfGenesClustered);}
 void Iteration::print() {
 
 	

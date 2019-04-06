@@ -40,12 +40,10 @@ class Iteration {
 		void setKForIndividuals(int);
 		int getKForGenes();
 		void setKForGenes(int);
-
 		cluster * getIndividualCentroids();
 		void setIndividualCentroids(cluster *);
 		cluster * getGeneCentroids();
 		void setGeneCentroids(cluster *);
-
 		double getIndividualSimilarityMeasure();
 		void setIndividualSimilarityMeasure(double);
 		double getGeneSimilarityMeasure();
@@ -56,6 +54,7 @@ class Iteration {
 		void setAmountOfIndividualsClustered(int);
 		int getAmountOfGenesClustered();
 		void setAmountOfGenesClustered(int);
+		int getAmountOfIndividualsAndGenesClustered();
 
 		void print();
 		

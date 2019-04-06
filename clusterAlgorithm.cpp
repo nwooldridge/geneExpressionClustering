@@ -9,8 +9,16 @@
 
 using namespace std;
 
-static void moveIndividualToCentroid(data * d, cluster * centroids, int individualIndex, int centroidIndex) {
+//TODO:
+//I realized a very large issue with my code. When moving an individual/gene to a centroid, I need to check whether any centroids are in between the
+//individual and centroid in question. If there are any, I need to either increase or decrease the index of that centroid by 1. 
+
+//Splits the array of individuals into two vectors: values before the centroid and values after the centroid.
+//This makes it easy to move individuals to the centroid. Just put it at the end of the before values or at the beginning
+//of the after values.
+static void moveIndividualToCentroid(data * d, int k, cluster * centroids, int individualIndex, int centroidIndex) {
 	
+	//Actual individual index of the centroid
 	int centroidIndividualIndex = centroids[centroidIndex].index;
 
 	int i, j;
@@ -18,8 +26,9 @@ static void moveIndividualToCentroid(data * d, cluster * centroids, int individu
 	vector<double *> beforeArr;
 	vector<double *> afterArr;
 	
-	//cout << "before moving: " << d->values[ centroidIndividualIndex ];
-
+	//Depending on whether the individual being moved is greater than or less than
+	//the centroid that it is being moved to, the individual will either be put 
+	//just before the centroid or just after. 
 	if (individualIndex > centroidIndividualIndex) {
 		centroids[centroidIndex].upperBoundIndex++;
 		afterArr.push_back(d->values[individualIndex]);	
@@ -33,8 +42,21 @@ static void moveIndividualToCentroid(data * d, cluster * centroids, int individu
 
 		beforeArr.push_back(d->values[centroidIndividualIndex]);
 		
+		//Other centroid indices could change if they are between the individual being moved and the centroid
+		//the individual is being moved to
+		for (i = 0; i < k; i++) {
+			if (i == centroidIndex)
+				continue;
+			if ((centroids[i].index > centroidIndividualIndex) && (centroids[i].index < individualIndex)) {
+				centroids[i].index++;
+				centroids[i].lowerBoundIndex++;
+				centroids[i].upperBoundIndex++;
+			}
+		}		
 	}
+	
 	else {
+		//same as above if statement, except the individual will be just before the centroid
 		centroids[centroidIndex].lowerBoundIndex--;
 		afterArr.push_back(d->values[centroidIndividualIndex]);
 
@@ -46,9 +68,22 @@ static void moveIndividualToCentroid(data * d, cluster * centroids, int individu
 			if (i != individualIndex)
 				afterArr.push_back(d->values[i]);
 
-		beforeArr.push_back(d->values[individualIndex]);		
+		beforeArr.push_back(d->values[individualIndex]);	
+		
+		//Other centroid indices could change if they are between the individual being moved and the centroid
+		//the individual is being moved to
+		for (i = 0; i < k; i++) {
+			if (i == centroidIndex)
+				continue;
+			if ((centroids[i].index < centroidIndividualIndex) && (centroids[i].index > individualIndex)) {
+				centroids[i].index--;
+				centroids[i].lowerBoundIndex--;
+				centroids[i].upperBoundIndex--;
+			}
+		}	
 	}
-	
+
+	//Reflect changes from this function in original dataset
 	int count = 0;
 	for (i = 0; i < beforeArr.size(); i++) {
 		d->values[count] = beforeArr[i];
@@ -59,12 +94,9 @@ static void moveIndividualToCentroid(data * d, cluster * centroids, int individu
 		d->values[count] = afterArr[i];
 		count++;
 	}
-	
-	
-	//cout << " after moving: " << d->values[ centroidIndividualIndex ] << endl;
 }
 
-static void moveGeneToCentroid(data * d, cluster * centroids, int geneIndex, int centroidIndex) {
+static void moveGeneToCentroid(data * d, int k, cluster * centroids, int geneIndex, int centroidIndex) {
 	
 	int centroidGeneIndex = centroids[centroidIndex].index;
 
@@ -95,6 +127,16 @@ static void moveGeneToCentroid(data * d, cluster * centroids, int geneIndex, int
                 	if (i != geneIndex)
                         	afterArr.push_back(swappedArr[i]);
 		beforeArr.push_back(swappedArr[centroidGeneIndex]);
+		
+		for (i = 0; i < k; i++) {
+			if (i == centroidIndex)
+				continue;
+			if ((centroids[i].index > centroidGeneIndex) && (centroids[i].index < geneIndex)) {
+				centroids[i].index++;
+				centroids[i].lowerBoundIndex++;
+				centroids[i].upperBoundIndex++;
+			}
+		}
 	}
 	else {
 		centroids[centroidIndex].lowerBoundIndex--;
@@ -106,6 +148,16 @@ static void moveGeneToCentroid(data * d, cluster * centroids, int geneIndex, int
                 	if (i != geneIndex)
                         	afterArr.push_back(swappedArr[i]);
 		beforeArr.push_back(swappedArr[geneIndex]);
+		
+		for (i = 0; i < k; i++) {
+			if (i == centroidIndex)
+				continue;
+			if ((centroids[i].index < centroidGeneIndex) && (centroids[i].index > geneIndex)) {
+				centroids[i].index--;
+				centroids[i].lowerBoundIndex--;
+				centroids[i].upperBoundIndex--;
+			}
+		}
 	}
 
 	int count = 0;
@@ -188,20 +240,35 @@ void clusterIndividuals(Iteration * iteration) {
 			}
 		}
 
-		//cout << mostRelatedSimilarityMeasure << " ?<= " << minSimilarityMeasure << endl;
-		
+		vector<double *> movedIndividuals; 		
+	
 		//compare lowestSimilarityMeasure achieved through algorithm to 
 		//given minimumSimilarityMeasure
 		//if less than, the individual will be moved to that centroid
 		if (mostRelatedSimilarityMeasure <= minSimilarityMeasure) {
-			numOfIndividualsMoved++;
-			centroids[mostRelatedCentroid].clusterSize++;
-			if ((i - centroids[mostRelatedCentroid].index) == 1)
-				centroids[mostRelatedCentroid].upperBoundIndex++;
-			else if ((i - centroids[mostRelatedCentroid].index) == -1) 
-				centroids[mostRelatedCentroid].lowerBoundIndex--;
-			else
-                                moveIndividualToCentroid(d, centroids, i, mostRelatedCentroid);
+
+			bool movedIndividualFlag = false;
+			for (j = 0; j < movedIndividuals.size(); j++) 
+			{
+				if (d->values[i] == movedIndividuals[j])
+				{
+					movedIndividualFlag = true;
+					break;
+				}
+			}
+
+			if (!movedIndividualFlag) 
+			{
+				movedIndividuals.push_back(d->values[i]);
+				numOfIndividualsMoved++;
+				centroids[mostRelatedCentroid].clusterSize++;
+				if ((i - centroids[mostRelatedCentroid].index) == 1)
+					centroids[mostRelatedCentroid].upperBoundIndex++;
+				else if ((i - centroids[mostRelatedCentroid].index) == -1) 
+					centroids[mostRelatedCentroid].lowerBoundIndex--;
+				else
+                         	       moveIndividualToCentroid(d, k, centroids, i, mostRelatedCentroid);
+			}
 		}
 	}
 
@@ -231,14 +298,16 @@ void clusterGenes(Iteration * iteration) {
 		double mostRelatedSimilarityMeasure = 1000000;
 		int mostRelatedCentroid;
 
-		for (j = 0; j < k; j++) 
+		for (j = 0; j < k; j++) { 
 			if (findGeneSimilarityMeasure(d, i, centroids[j].index ) < mostRelatedSimilarityMeasure) {
 				mostRelatedSimilarityMeasure = findGeneSimilarityMeasure(d, i, centroids[j].index );
 				mostRelatedCentroid = j;
 
 			}
-		
+		}
+
 		if (mostRelatedSimilarityMeasure <= minSimilarityMeasure) {
+			
 			numOfGenesMoved++;
 			centroids[mostRelatedCentroid].clusterSize++;
 			if ((i - centroids[mostRelatedCentroid].index) == 1)
@@ -246,14 +315,9 @@ void clusterGenes(Iteration * iteration) {
 			else if ((i - centroids[mostRelatedCentroid].index) == -1)
 				centroids[mostRelatedCentroid].lowerBoundIndex--;
 			else
-				moveGeneToCentroid(d, centroids, i, mostRelatedCentroid);
-			
-			
+				moveGeneToCentroid(d, k, centroids, i, mostRelatedCentroid);			
 		}
-
 	}
-	
 	iteration->setAmountOfGenesClustered(numOfGenesMoved);
-
 }
 

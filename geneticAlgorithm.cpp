@@ -6,8 +6,9 @@
 
 #include "data.h"
 #include "clusterAlgorithm.h"
-#include "generateBMP.h"
+#include "generateCSV.h"
 #include "Iteration.h"
+#include "fitnessFunction.h"
 
 using namespace std;
 
@@ -72,14 +73,14 @@ static data * copyData(data * d) {
 }
 
 //generates child iteration
-static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, data * dataset) {
+static void reproduce(Iteration ** oldPopulation, int populationSize, data * dataset, Iteration * offSpring) {
 	
 	int i,j;
 	
 	long totalFitness = 0;
 	
 	for (i = 0; i < populationSize; i++) {
-		if ((oldPopulation[i]->getFitness() < 100) && (oldPopulation[i]->getFitness() >= 0))
+		if ((oldPopulation[i]->getFitness() <= 100) && (oldPopulation[i]->getFitness() >= 0))
 			totalFitness += (oldPopulation[i]->getFitness());
 		else
 			cout << "Error, fitness is value not between 0-99\n";
@@ -116,8 +117,6 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	for (i = 0; i < parentCount; i++)
 		parents[i] = naturalSelectionPool[rand() % totalFitness];
 	
-	//create new Iteration object
-	Iteration * offSpring = new Iteration(copyData(dataset));	
 	
 	//
 	//
@@ -210,7 +209,6 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
                 geneCentroids[i].clusterSize = 0;
         }
 	
-	//TODO: Modify to set values to new struct created for clusters
 	offSpring->setIndividualCentroids(individualCentroids);
 	offSpring->setGeneCentroids(geneCentroids);
 
@@ -218,51 +216,28 @@ static Iteration * reproduce(Iteration ** oldPopulation, int populationSize, dat
 	offSpring->setIndividualSimilarityMeasure(parents[0]->getIndividualSimilarityMeasure());
 	offSpring->setGeneSimilarityMeasure(parents[0]->getGeneSimilarityMeasure());
 
-	//TODO: need to find a way to set the fitness of each iteration. The fitness will be
-	//determined on how well the data itself is clustered
-	offSpring->setFitness(rand() % 100);
-	
-	//for (i = 0; i < offSpring->getData()->numIndividuals; i++)
-		//cout << offSpring->getData()->values[i] << " ";
-	//cout << endl << endl;
 	clusterIndividuals(offSpring);
-	//for (i = 0; i < offSpring->getData()->numIndividuals; i++)
-                //cout << offSpring->getData()->values[i] << " ";
-        //cout << endl << endl;
 
 	clusterGenes(offSpring);	
 
-	offSpring->print();
+	//offSpring->print();
 
-	return offSpring;
 
 }
 
 //create new population of given amount of iterations
 static Iteration ** createNewPopulation(Iteration ** oldPopulation, int populationSize, data * dataset) {
+	
+	//SET FITNESS OF THE OLD POPULATION	
+	findFitness(oldPopulation, populationSize);
 
+	generateCSV(oldPopulation, populationSize, iterations);
+	
 	Iteration ** newPopulation = new Iteration*[populationSize];
 	for (int i = 0; i < populationSize; i++)
-		newPopulation[i] = reproduce(oldPopulation, populationSize, dataset);
-	
-	
-	//Generate bitmap heatmaps
-	//TODO
-	//This is very slow, I may just have to output csv files and just 
-	//view them in Excel with conditional formatting for the heatmap
-	
-	/*	
-	cout << "Current iteration: " << iterations << " Total Iterations: " << totalIterations << endl;
-	for (int i = 0; i < populationSize; i++) {
-		if (iterations == (totalIterations - 1)) {
-			string filename = "../results/";
-			filename += ("generation" + to_string(iterations) + "iteration" + to_string(i) + ".bmp");
-			generateBMP(newPopulation[i]->getData(), filename);
-		}
-		
+	{	newPopulation[i] = new Iteration(copyData(dataset));
+		reproduce(oldPopulation, populationSize, dataset, newPopulation[i]);
 	}
-	*/
-	
 
 	iterations++;
 	cout << "New population generated\n";
@@ -287,7 +262,8 @@ static Iteration ** initializePopulation(data * dataSet, int populationSize) {
 		newPopulation[i]->setGeneCentroids(new cluster[newPopulation[i]->getKForGenes()]);
 		newPopulation[i]->setIndividualSimilarityMeasure(findOptimalIndividualSimilarityMeasure(dataSet));
 		newPopulation[i]->setGeneSimilarityMeasure(findOptimalGeneSimilarityMeasure(dataSet));
-		
+		newPopulation[i]->setAmountOfIndividualsClustered(rand() % 25);
+		newPopulation[i]->setAmountOfGenesClustered(rand() % 25);	
 		//set centroids to random individuals
 	
 		vector<int> usedNumbers;

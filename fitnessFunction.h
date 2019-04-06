@@ -4,4 +4,4 @@
 #define FITNESSFUNCTION_H
 #endif
 
-int findFitness(Iteration *);
+void findFitness(Iteration **, int);
